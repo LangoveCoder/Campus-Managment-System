@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title|default:"Campus Management Platform" }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .campus-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .campus-option {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .campus-option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .campus-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .campus-option input[type="radio"]:checked + .campus-content {
+            border-left: 4px solid #667eea;
+            padding-left: 16px;
+        }
+        
+        .campus-option input[type="radio"]:checked ~ .checkmark {
+            display: block;
+        }
+        
+        .campus-content {
+            transition: all 0.2s;
+        }
+        
+        .campus-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .campus-roles {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .role-badge {
+            display: inline-block;
+            background: #e8eaf6;
+            color: #5c6bc0;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 6px;
+            margin-top: 4px;
+        }
+        
+        .checkmark {
+            display: none;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #667eea;
+            font-size: 24px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .no-campuses {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Select Your Campus</h1>
+        <p class="subtitle">Choose the campus you want to work with</p>
+        
+        {% if campus_roles %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="campus-list">
+                {% for campus_role in campus_roles %}
+                <label class="campus-option">
+                    <input type="radio" name="campus_id" value="{{ campus_role.campus.id }}" required>
+                    <div class="campus-content">
+                        <div class="campus-name">{{ campus_role.campus.name }}</div>
+                        <div class="campus-roles">
+                            {% for role in campus_role.roles %}
+                            <span class="role-badge">{{ role }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <span class="checkmark">✓</span>
+                </label>
+                {% endfor %}
+            </div>
+            
+            <button type="submit" class="btn">Continue</button>
+        </form>
+        {% else %}
+        <div class="no-campuses">
+            <p>You don't have access to any campuses yet.</p>
+            <p style="margin-top: 10px; font-size: 14px;">Please contact your administrator.</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
