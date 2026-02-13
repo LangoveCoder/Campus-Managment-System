@@ -11,7 +11,16 @@ from .models import (
     RolePermissionMap,
     UserRoleBinding,
     BiometricIdentity,
+    Device,
 )
+
+
+@admin.register(Device)
+class DeviceAdmin(admin.ModelAdmin):
+    list_display = ['name', 'device_type', 'campus', 'status', 'is_active', 'last_heartbeat']
+    list_filter = ['device_type', 'status', 'campus', 'is_active']
+    search_fields = ['name', 'driver_identifier', 'ip_address']
+    readonly_fields = ['id', 'created_at', 'last_heartbeat']
 
 
 @admin.register(Person)

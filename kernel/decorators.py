@@ -2,24 +2,22 @@ from functools import wraps
 from .services.audit_service import AuditService
 from .context import get_current_campus_id, get_current_person_id
 
-def audit_action(action_name=None):
+def audit_action(action=None, target_type=None, **audit_kwargs):
     """
     Decorator to automatically log service method calls.
     
     Usage:
-        @audit_action(action_name="create_student")
-        def create_student(self, ...):
-            ...
-            
-    If action_name is not provided, it defaults to the method name.
+        @audit_action
+        def my_method(self): ...
+        
+        @audit_action(action="create_student", target_type="Person")
+        def create_student(self): ...
     """
-    def decorator(func):
+    def _create_wrapper(func, action_name, target_type_val):
         @wraps(func)
         def wrapper(*args, **kwargs):
             # Determine action name
-            nonlocal action_name
-            if not action_name:
-                action_name = func.__name__
+            actual_action = action_name or func.__name__
 
             # Capture context
             person_id = get_current_person_id()
@@ -31,29 +29,36 @@ def audit_action(action_name=None):
                 
                 # Log success
                 AuditService.log_action(
-                    action=action_name,
+                    action=actual_action,
                     actor_person_id=person_id,
                     campus_id=campus_id,
+                    target_type=target_type_val,
                     result='SUCCESS',
-                    # We could try to serialize args/kwargs here for 'changes'
-                    # but that might be heavy or contain sensitive data
-                    reason=f"Method {action_name} completed successfully"
+                    reason=f"Method {actual_action} completed successfully"
                 )
                 return result
                 
             except Exception as e:
                 # Log failure
                 AuditService.log_action(
-                    action=action_name,
+                    action=actual_action,
                     actor_person_id=person_id,
                     campus_id=campus_id,
+                    target_type=target_type_val,
                     result='FAILURE',
                     reason=str(e)
                 )
                 raise e
-                
         return wrapper
-    return decorator
+
+    if callable(action):
+        # Called as @audit_action without arguments
+        return _create_wrapper(action, None, None)
+    else:
+        # Called as @audit_action(...)
+        def decorator(func):
+            return _create_wrapper(func, action, target_type)
+        return decorator
 
 def audit_permission(permission_required):
     """
@@ -64,11 +69,6 @@ def audit_permission(permission_required):
         def wrapper(*args, **kwargs):
             person_id = get_current_person_id()
             campus_id = get_current_campus_id()
-            
-            # Note: This is a simplified logger.
-            # Real permission enforcement happens inside the service/view.
-            # This decorator is best used when we want to EXPLICITLY log
-            # that a specific sensitive action was attempted.
             
             try:
                 return func(*args, **kwargs)

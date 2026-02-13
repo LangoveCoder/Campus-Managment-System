@@ -1,0 +1,264 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biometric Enrollment - {{ person.full_name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --surface: #ffffff;
+            --background: #f3f4f6;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            margin: 0;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            background-color: var(--surface);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .scanner-visual {
+            width: 120px;
+            height: 160px;
+            border: 2px dashed var(--border);
+            border-radius: 0.5rem;
+            margin: 0 auto 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-muted);
+            position: relative;
+            background-color: #f9fafb;
+        }
+
+        .scanner-visual.scanning {
+            border-color: var(--primary);
+            color: var(--primary);
+            animation: pulse 1.5s infinite;
+        }
+
+        .scanner-visual.success {
+            border-color: var(--success);
+            color: var(--success);
+            background-color: #ecfdf5;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(79, 70, 229, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+            }
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #4338ca;
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .status-msg {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            min-height: 1.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>Biometric Enrollment</h1>
+        <p>Enrollment for <strong>{{ person.full_name }}</strong></p>
+
+        <div id="scanner" class="scanner-visual">
+            <span id="scanner-icon">👆</span>
+        </div>
+
+        <button id="scan-btn" class="btn" onclick="startScanning()">Start Scan</button>
+        <div id="status" class="status-msg"></div>
+
+        <div style="margin-top: 1rem;">
+            <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">Cancel</a>
+        </div>
+    </div>
+
+    <script>
+        const personId = "{{ person.id }}";
+        const scannerEl = document.getElementById('scanner');
+        const statusEl = document.getElementById('status');
+        const btnEl = document.getElementById('scan-btn');
+        let ws = null;
+        let bridgeConnected = false;
+
+        function connectBridge() {
+            statusEl.textContent = "Connecting to Hardware Bridge...";
+            statusEl.style.color = "var(--text-muted)";
+
+            ws = new WebSocket('ws://localhost:15432');
+
+            ws.onopen = function () {
+                console.log("Bridge Connected");
+                bridgeConnected = true;
+                statusEl.textContent = "Hardware Bridge Connected. Ready.";
+                statusEl.style.color = "var(--success)";
+                btnEl.disabled = false;
+                btnEl.textContent = "Start Scan";
+
+                // Check device status
+                ws.send(JSON.stringify({ command: 'STATUS' }));
+            };
+
+            ws.onclose = function () {
+                console.log("Bridge Disconnected");
+                bridgeConnected = false;
+                statusEl.textContent = "Bridge Disconnected. Please start the bridge app.";
+                statusEl.style.color = "var(--error)";
+                btnEl.disabled = true;
+
+                // Try reconnecting in 3s
+                setTimeout(connectBridge, 3000);
+            };
+
+            ws.onerror = function (err) {
+                console.error("Bridge Error", err);
+                ws.close();
+            };
+
+            ws.onmessage = function (event) {
+                const data = JSON.parse(event.data);
+                console.log("Bridge Message:", data);
+
+                if (data.type === 'STATUS') {
+                    if (data.status === 'ONLINE') {
+                        statusEl.textContent = "Scanner Online. Ready to enroll.";
+                    } else {
+                        statusEl.textContent = "Scanner Status: " + data.status;
+                        statusEl.style.color = "var(--warning)";
+                    }
+                } else if (data.type === 'CAPTURING') {
+                    statusEl.textContent = "Place finger on scanner...";
+                    scannerEl.classList.add('scanning');
+                    btnEl.disabled = true;
+                } else if (data.type === 'CAPTURE_SUCCESS') {
+                    scannerEl.classList.remove('scanning');
+                    statusEl.textContent = "Scan Captured! Processing...";
+
+                    // Send to Server API
+                    enrollToServer(data.data);
+
+                } else if (data.type === 'CAPTURE_TIMEOUT') {
+                    scannerEl.classList.remove('scanning');
+                    statusEl.textContent = "Scan Timed Out. Try again.";
+                    statusEl.style.color = "var(--warning)";
+                    btnEl.disabled = false;
+                } else if (data.type === 'ERROR') {
+                    statusEl.textContent = "Bridge Error: " + data.message;
+                    statusEl.style.color = "var(--error)";
+                    btnEl.disabled = false;
+                }
+            };
+        }
+
+        function startScanning() {
+            if (!ws || !bridgeConnected) return;
+            ws.send(JSON.stringify({ command: 'CAPTURE' }));
+        }
+
+        function enrollToServer(base64Data) {
+            const payload = {
+                person_id: personId,
+                biometric_type: 'FINGERPRINT',
+                data_base64: base64Data
+            };
+
+            fetch('/api/biometric/enroll', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        scannerEl.classList.add('success');
+                        scannerEl.innerHTML = '✅';
+                        statusEl.textContent = "Enrollment Successful!";
+                        statusEl.style.color = "var(--success)";
+                        btnEl.textContent = "Done";
+                        btnEl.disabled = false;
+                        btnEl.onclick = () => window.location.href = '/';
+                    } else {
+                        statusEl.textContent = "Server Error: " + data.error;
+                        statusEl.style.color = "var(--error)";
+                        btnEl.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    statusEl.textContent = "Network Error";
+                    statusEl.style.color = "var(--error)";
+                    btnEl.disabled = false;
+                });
+        }
+
+        // Initialize connection on load
+        connectBridge();
+    </script>
+</body>
+
+</html>

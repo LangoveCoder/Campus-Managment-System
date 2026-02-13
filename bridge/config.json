@@ -1,0 +1,6 @@
+{
+    "driver": "mock",
+    "port": 15432,
+    "host": "localhost",
+    "notes": "Change 'driver' to 'secugen' or 'zkteco' to switch hardware."
+}

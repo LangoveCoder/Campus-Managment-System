@@ -7,7 +7,7 @@ from .identity_service import IdentityService
 from .authorization_service import AuthorizationService
 from .role_binding_service import RoleBindingService
 from .person_service import PersonService
-
+from .biometric_service import BiometricService
 from .audit_service import AuditService
 
 __all__ = [
@@ -15,5 +15,6 @@ __all__ = [
     'AuthorizationService',
     'RoleBindingService',
     'PersonService',
+    'BiometricService',
     'AuditService',
 ]

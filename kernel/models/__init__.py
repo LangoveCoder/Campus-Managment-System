@@ -13,6 +13,7 @@ from .user_role_binding import UserRoleBinding
 from .biometric import BiometricIdentity
 from .base import BaseCampusModel
 from .audit import AuditLog
+from .device import Device
 
 __all__ = [
     'Person',
@@ -25,4 +26,5 @@ __all__ = [
     'BiometricIdentity',
     'BaseCampusModel',
     'AuditLog',
+    'Device',
 ]

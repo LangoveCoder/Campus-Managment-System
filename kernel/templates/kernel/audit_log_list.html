@@ -176,15 +176,15 @@
             <select name="action" class="form-control">
                 <option value="">All Actions</option>
                 {% for act in actions %}
-                <option value="{{ act }}" {% if action_filter==act %}selected{% endif %}>{{ act }}</option>
+                <option value="{{ act }}" {% if action_filter == act %}selected{% endif %}>{{ act }}</option>
                 {% endfor %}
             </select>
 
             <select name="result" class="form-control">
                 <option value="">All Results</option>
-                <option value="SUCCESS" {% if result_filter=='SUCCESS' %}selected{% endif %}>Success</option>
-                <option value="FAILURE" {% if result_filter=='FAILURE' %}selected{% endif %}>Failure</option>
-                <option value="DENIED" {% if result_filter=='DENIED' %}selected{% endif %}>Denied</option>
+                <option value="SUCCESS" {% if result_filter == 'SUCCESS' %}selected{% endif %}>Success</option>
+                <option value="FAILURE" {% if result_filter == 'FAILURE' %}selected{% endif %}>Failure</option>
+                <option value="DENIED" {% if result_filter == 'DENIED' %}selected{% endif %}>Denied</option>
             </select>
 
             <button type="submit" class="btn btn-primary">Filter</button>
