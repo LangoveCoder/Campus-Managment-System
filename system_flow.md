@@ -1,7 +1,7 @@
 # Campus Management Platform - System Flow Design
 
 **Version:** 1.0  
-**Last Updated:** 2026-02-14 01:15  
+**Last Updated:** 2026-02-17 13:20  
 **Implementation Status:** PROJECT COMPLETE ✅ (All Phases Delivered)
 
 ---
@@ -42,6 +42,11 @@ This document explains **how the entire Campus Management Platform works** - fro
 - **Testing:** Integration, Security, and Load tests passed (81ms latency)
 - **Documentation:** Full suite (`API.md`, `DEPLOYMENT.md`, `DEVELOPER.md`, `USER_GUIDE.md`)
 
+### ✅ Completed (Phase 8)
+- **Constitutional Fidelity:** Upgraded to PostgreSQL Native Exclusion Constraints (`btree_gist` + `ExclusionConstraint`)
+- **Temporal Integrity:** Replaced `valid_from`/`valid_until` with `validity` (DateTimeRangeField) to strictly prevent overlaps.
+- **Hardening:** Added GIST index for performance, set default validity to `[now, infinity)`, and enforced deactivation-closes-range rule.
+
 ### 🏁 Project Status
 - **System is Production Ready.**
 
@@ -54,7 +59,7 @@ Person (Immutable Identity)
     ↓
 UserAccount (Login Credentials)
     ↓
-UserRoleBinding (Role + Campus + Time + Entity)
+UserRoleBinding (Role + Campus + ValidityRange + Entity + GIST Index)
     ↓
 Permissions (What They Can Do)
 ```
@@ -125,7 +130,7 @@ Call AuthorizationService.has_permission(
 )
     ↓
 Service logic:
-  1. Get active bindings for (person, campus, today)
+  1. Get active bindings for (person, campus, validity__contains=now)
   2. Aggregate all permissions from all active roles
   3. Check if 'academic.view_grades' is in the set
     ↓
