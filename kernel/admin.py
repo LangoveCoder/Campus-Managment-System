@@ -70,8 +70,8 @@ class RolePermissionMapAdmin(admin.ModelAdmin):
 
 @admin.register(UserRoleBinding)
 class UserRoleBindingAdmin(admin.ModelAdmin):
-    list_display = ['person', 'role', 'campus', 'valid_from', 'valid_until', 'is_active']
-    list_filter = ['role', 'campus', 'is_active', 'valid_from']
+    list_display = ['person', 'role', 'campus', 'validity', 'is_active']
+    list_filter = ['role', 'campus', 'is_active']
     search_fields = ['person__full_name', 'role__name', 'campus__name']
     readonly_fields = ['id', 'created_at', 'deactivated_at']
 

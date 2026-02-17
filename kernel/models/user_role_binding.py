@@ -1,13 +1,16 @@
-"""
-UserRoleBinding Model - The Heart of Authorization
-
-Binds a person to a role at a specific campus for a time period.
-"""
+from django.contrib.postgres.constraints import ExclusionConstraint
+from django.contrib.postgres.fields import DateTimeRangeField, RangeOperators
 from django.db import models
 from django.utils import timezone
+from psycopg2.extras import DateTimeTZRange
 from .person import Person
 from .role import Role
 from .campus import Campus
+
+
+def default_validity():
+    """Default validity starting now (open-ended)."""
+    return DateTimeTZRange(timezone.now(), None, '[]')
 
 
 class UserRoleBinding(models.Model):
@@ -42,14 +45,10 @@ class UserRoleBinding(models.Model):
         help_text="The campus where this role applies"
     )
     
-    valid_from = models.DateTimeField(
-        help_text="Role is valid from this date"
-    )
-    
-    valid_until = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="Role is valid until this date (null = indefinite)"
+    # Temporal Validity (PostgreSQL Range Type)
+    validity = DateTimeRangeField(
+        default=default_validity,
+        help_text="Time range validation [start, end)"
     )
     
     is_active = models.BooleanField(
@@ -64,11 +63,21 @@ class UserRoleBinding(models.Model):
         db_table = 'kernel_user_role_bindings'
         verbose_name = 'User Role Binding'
         verbose_name_plural = 'User Role Bindings'
+        constraints = [
+            ExclusionConstraint(
+                name='exclude_overlapping_role_bindings',
+                expressions=[
+                    ('person', RangeOperators.EQUAL),
+                    ('role', RangeOperators.EQUAL),
+                    ('campus', RangeOperators.EQUAL),
+                    ('validity', RangeOperators.OVERLAPS),
+                ],
+                index_type='GIST',
+            ),
+        ]
         indexes = [
             models.Index(fields=['person', 'campus'], name='idx_binding_person_campus'),
-            models.Index(fields=['valid_from', 'valid_until'], name='idx_binding_validity'),
         ]
-        unique_together = [['person', 'role', 'campus', 'valid_from']]
     
     def __str__(self) -> str:
         return f"{self.person.full_name} as {self.role.name} @ {self.campus.name}"
@@ -76,13 +85,23 @@ class UserRoleBinding(models.Model):
     def __repr__(self) -> str:
         return f"<UserRoleBinding: {self.person.full_name} → {self.role.name} @ {self.campus.name}>"
     
+    def save(self, *args, **kwargs):
+        """
+        Constitutional Rule: Deactivation must close the validity range.
+        If is_active is set to False, we cap validity at now.
+        """
+        if not self.is_active and self.validity and self.validity.upper is None:
+            # Close the range at now
+            self.validity = DateTimeTZRange(self.validity.lower, timezone.now(), bounds='[)')
+        super().save(*args, **kwargs)
+
     def is_currently_valid(self) -> bool:
         """Check if this binding is currently valid."""
-        now = timezone.now()
         if not self.is_active:
             return False
-        if self.valid_from > now:
+        
+        # Strictly use the validity range
+        if not self.validity:
             return False
-        if self.valid_until and self.valid_until < now:
-            return False
-        return True
+            
+        return timezone.now() in self.validity

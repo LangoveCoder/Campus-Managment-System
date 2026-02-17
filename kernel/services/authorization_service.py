@@ -37,10 +37,7 @@ class AuthorizationService:
             person_id=person_id,
             campus_id=campus_id,
             is_active=True,
-            valid_from__lte=now
-        ).filter(
-            # valid_until is null (indefinite) OR valid_until is in the future
-            models.Q(valid_until__isnull=True) | models.Q(valid_until__gte=now)
+            validity__contains=now
         ).select_related('role', 'campus')
     
     @staticmethod

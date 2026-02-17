@@ -9,6 +9,7 @@ from datetime import datetime
 from django.db import models
 from django.db.models import QuerySet
 from django.utils import timezone
+from psycopg2.extras import DateTimeTZRange
 from ..models import UserRoleBinding, Person, Role, Campus
 from ..exceptions import InvalidBindingException, BindingExpiredException
 from .identity_service import IdentityService
@@ -69,12 +70,14 @@ class RoleBindingService:
             )
         
         # Create the binding
+        # Convert valid_from/until to PostgreSQL Range
+        validity = DateTimeTZRange(valid_from, valid_until, bounds='[)')
+        
         binding = UserRoleBinding.objects.create(
             person=person,
             role=role,
             campus=campus,
-            valid_from=valid_from,
-            valid_until=valid_until,
+            validity=validity,
             is_active=True,
             **kwargs
         )
@@ -123,9 +126,7 @@ class RoleBindingService:
             now = timezone.now()
             queryset = queryset.filter(
                 is_active=True,
-                valid_from__lte=now
-            ).filter(
-                models.Q(valid_until__isnull=True) | models.Q(valid_until__gte=now)
+                validity__contains=now
             )
         
         return queryset
@@ -153,9 +154,7 @@ class RoleBindingService:
             now = timezone.now()
             queryset = queryset.filter(
                 is_active=True,
-                valid_from__lte=now
-            ).filter(
-                models.Q(valid_until__isnull=True) | models.Q(valid_until__gte=now)
+                validity__contains=now
             )
         
         return queryset
@@ -202,7 +201,9 @@ class RoleBindingService:
                 "new_valid_until must be after valid_from"
             )
         
-        binding.valid_until = new_valid_until
+        # Create new range preserving the start
+        current_start = binding.validity.lower
+        binding.validity = DateTimeTZRange(current_start, new_valid_until, bounds='[)')
         binding.save()
         
         return binding
