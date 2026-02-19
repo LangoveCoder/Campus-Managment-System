@@ -45,6 +45,10 @@ INSTALLED_APPS = [
     "django.contrib.postgres",  # PostgreSQL extensions
     # Campus Management Platform
     "kernel",
+    "modules.academics",
+    "modules.admissions",
+    "modules.attendance",
+    "modules.workforce",
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,65 @@
+
+import hashlib
+from django.utils import timezone
+from django.db import transaction
+from modules.workforce.models import WorkforceAttendanceDevice, WorkforceAttendanceEvent, WorkforceDailyAttendance
+from kernel.exceptions import AuthorizationException
+
+class BiometricIngestionService:
+    @staticmethod
+    def authenticate_device(token: str) -> WorkforceAttendanceDevice:
+        """
+        Authenticates a device by its API token.
+        """
+        token_hash = hashlib.sha256(token.encode()).hexdigest()
+        try:
+            device = WorkforceAttendanceDevice.objects.get(api_token=token_hash, is_active=True)
+            device.last_heartbeat = timezone.now()
+            device.save(update_fields=['last_heartbeat'])
+            return device
+        except WorkforceAttendanceDevice.DoesNotExist:
+            raise AuthorizationException("Invalid Device Token")
+
+    @staticmethod
+    @transaction.atomic
+    def ingest_event(device_token: str, person_id: int, event_type: str, event_time, source: str):
+        """
+        Ingests a raw event from a device.
+        Updates the Daily Summary.
+        """
+        device = BiometricIngestionService.authenticate_device(device_token)
+        
+        # Log Immutable Event
+        event = WorkforceAttendanceEvent.objects.create(
+            campus_id=device.campus_id,
+            device=device,
+            person_id=person_id,
+            event_type=event_type,
+            event_time=event_time,
+            source=source
+        )
+        
+        # Update Daily Summary (Idempotent-ish)
+        # We need to find or create the daily record
+        daily_record, created = WorkforceDailyAttendance.objects.get_or_create(
+            campus_id=device.campus_id,
+            person_id=person_id,
+            date=event_time.date()
+        )
+        
+        # Logic: First check-in is min(event_time), Last check-out is max(event_time)
+        # Actually, simpler:
+        # If CHECK_IN: if first_check_in is None or time < first_check_in -> update
+        # If CHECK_OUT: if last_check_out is None or time > last_check_out -> update
+        
+        if event_type == 'CHECK_IN':
+            if not daily_record.first_check_in or event_time < daily_record.first_check_in:
+                daily_record.first_check_in = event_time
+                daily_record.save()
+                
+        elif event_type == 'CHECK_OUT':
+            if not daily_record.last_check_out or event_time > daily_record.last_check_out:
+                daily_record.last_check_out = event_time
+                daily_record.save()
+                
+        return event

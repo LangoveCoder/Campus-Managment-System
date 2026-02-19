@@ -48,6 +48,12 @@ class BindingExpiredException(AuthorizationException):
     pass
 
 
+
 class UserAccountNotFoundException(IdentityException):
     """Raised when a user account cannot be found."""
+    pass
+
+
+class BusinessRuleViolation(Exception):
+    """Raised when a business rule is violated."""
     pass

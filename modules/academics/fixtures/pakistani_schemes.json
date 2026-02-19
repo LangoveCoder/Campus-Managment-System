@@ -1,0 +1,84 @@
+[
+    {
+        "model": "academics.assessmentscheme",
+        "pk": 1,
+        "fields": {
+            "campus": 1,
+            "name": "Three-Term Scheme",
+            "description": "Standard 3-term system for O-Levels",
+            "is_active": true,
+            "created_at": "2026-02-18T00:00:00Z"
+        }
+    },
+    {
+        "model": "academics.assessmentperiod",
+        "pk": 1,
+        "fields": {
+            "assessment_scheme": 1,
+            "name": "3-Monthly",
+            "sequence": 1,
+            "weight": "10.00",
+            "description": "First term assessment",
+            "created_at": "2026-02-18T00:00:00Z"
+        }
+    },
+    {
+        "model": "academics.assessmentperiod",
+        "pk": 2,
+        "fields": {
+            "assessment_scheme": 1,
+            "name": "6-Monthly",
+            "sequence": 2,
+            "weight": "20.00",
+            "description": "Mid-year assessment",
+            "created_at": "2026-02-18T00:00:00Z"
+        }
+    },
+    {
+        "model": "academics.assessmentperiod",
+        "pk": 3,
+        "fields": {
+            "assessment_scheme": 1,
+            "name": "Annual",
+            "sequence": 3,
+            "weight": "70.00",
+            "description": "Final term assessment",
+            "created_at": "2026-02-18T00:00:00Z"
+        }
+    },
+    {
+        "model": "academics.assessmentscheme",
+        "pk": 2,
+        "fields": {
+            "campus": 1,
+            "name": "Semester System",
+            "description": "University style semester system",
+            "is_active": true,
+            "created_at": "2026-02-18T00:00:00Z"
+        }
+    },
+    {
+        "model": "academics.assessmentperiod",
+        "pk": 4,
+        "fields": {
+            "assessment_scheme": 2,
+            "name": "Mid-Term",
+            "sequence": 1,
+            "weight": "30.00",
+            "description": "Mid semester exam",
+            "created_at": "2026-02-18T00:00:00Z"
+        }
+    },
+    {
+        "model": "academics.assessmentperiod",
+        "pk": 5,
+        "fields": {
+            "assessment_scheme": 2,
+            "name": "Final",
+            "sequence": 2,
+            "weight": "70.00",
+            "description": "Final semester exam",
+            "created_at": "2026-02-18T00:00:00Z"
+        }
+    }
+]

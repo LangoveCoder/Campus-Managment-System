@@ -495,3 +495,66 @@ This design ensures:
 - ✅ Complete audit trail
 - ✅ Biometric integration
 - ✅ Scalable to many colleges
+
+---
+
+## 14. Academic Module Flow (Phase 9)
+
+### Core Hierarchy
+```
+AcademicProgram (Matric/O-Level)
+    ↓
+AcademicCycle (Year 2026/Term 1)
+    ↓
+ClassGroup (Grade 9-A)
+    ↓
+Enrollment (Student ↔ Class)
+```
+
+### Assessment Flow
+```
+1. Setup:
+   AssessmentScheme (3-Term)
+      ↓
+   AssessmentPeriod (Mid-Term)
+
+2. Execution:
+   AssessmentInstance (Math Mid-Term Exam)
+      ↓
+   AssessmentResult (Student: 85/100)
+```
+
+### Authorization Facade
+- **Academics** module does NOT touch Kernel directly.
+- Uses `modules.academics.auth.AuthorizationFacade`.
+- Ensures strict modularity and testability.
+
+---
+
+## 15. Admissions Flow (Phase 10)
+
+### Pipeline Architecture
+```
+Applicant (Raw Human Data)
+    ↓
+AdmissionApplication (JSON Payload)
+    ↓
+Status: SUBMITTED
+    ↓
+Phase 1: Testing (AdmissionTestResult)
+    ↓
+Phase 2: Interview (InterviewEvaluation)
+    ↓
+Phase 3: Decision (AdmissionDecision)
+    ↓
+Status: ACCEPTED
+    ↓
+Handoff: AdmissionsService.convert_to_enrollment()
+    ↓
+Academics Module (StudentProfile Created)
+```
+
+### Key Principles
+1.  **Dynamic Schema:** No fixed fields for application forms.
+2.  **Kernel Decoupling:** Uses `AuthorizationFacade` for all checks.
+3.  **Strict Handoff:** Admissions = "Decide", Academics = "Enroll".

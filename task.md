@@ -17,6 +17,10 @@
 - [x] Phase 6: Testing & Validation (15/15 tasks) ✅ **COMPLETE**
 - [x] Phase 7: Documentation & Handoff (8/8 tasks) ✅ **COMPLETE**
 - [x] Phase 8: Constitutional Fidelity (Temporal Upgrade) (5/5 tasks) ✅ **COMPLETE**
+- [x] Phase 9: Academic Core (0/20 tasks) ✅ **COMPLETE**
+- [x] Phase 10: Admissions Module (Constitutional Data Pipeline) (15/15 tasks) ✅ **COMPLETE**
+- [x] Phase 11: Attendance Module (Student Ledger) (15/15 tasks) ✅ **COMPLETE**
+- [x] Phase 12: Workforce Attendance Module (v1) (15/15 tasks) ✅ **COMPLETE**
 
 ---
 
@@ -351,7 +355,135 @@
 **Phase 8 Status:** [x] Complete
 
 ### 8.3 Constitutional Hardening (User Requested)
-- [x] **8.3.1** Update `UserRoleBinding` model (Default validity, GIST index, `is_currently_valid` fix) (Completed 2026-02-17)
-- [x] **8.3.2** Implement deactivation consistency (auto-close range) (Completed 2026-02-17)
-- [x] **8.3.3** Generate and apply hardening migration (Completed 2026-02-17)
 - [x] **8.3.4** Verify with updated tests (Completed 2026-02-17)
+
+**Phase 8 Status:** [x] Complete
+
+---
+
+## PHASE 9: Academic Core (New Module)
+
+### 9.1 Module Setup (Constitutional)
+- [x] **9.1.1** Create `modules/academics` app structure (Constitution 11.4)
+- [x] **9.1.2** Implement `apps.py` with permission registration (Constitution 5.2)
+- [x] **9.1.3** Define `permissions.py` (Constitution 5.2)
+
+### 9.2 Core Structure Models (Frozen)
+- [x] **9.2.1** Create `AcademicProgram` (Constitutional Section 2.1)
+- [x] **9.2.2** Create `AcademicCycle` (Constitutional Section 2.2)
+- [x] **9.2.3** Create `Course` (Constitutional Section 2.3)
+- [x] **9.2.4** Create `CourseOffering` (Constitutional Section 2.4)
+- [x] **9.2.5** Create `ClassGroup` (Constitutional Section 2.5)
+
+### 9.3 Student & Teaching Models (Frozen)
+- [x] **9.3.1** Create `StudentProfile` (Constitutional Section 2.6)
+- [x] **9.3.2** Create `Enrollment` (Constitutional Section 2.7)
+- [x] **9.3.3** Create `TeachingAssignment` (Constitutional Section 2.8)
+
+### 9.4 Assessment Structure Models (Frozen)
+- [x] **9.4.1** Create `AssessmentScheme` (Constitutional Section 3.1)
+- [x] **9.4.2** Create `AssessmentPeriod` (Constitutional Section 3.2)
+- [x] **9.4.3** Create `AssessmentInstance` (Constitutional Section 3.3)
+- [x] **9.4.4** Create `AssessmentResult` (Constitutional Section 3.4)
+
+### 9.5 Services & Logic (Mandatory)
+- [x] **9.5.1** Create `EnrollmentService` (Constitution 7.1)
+- [x] **9.5.2** Create `AssessmentService` (Constitution 7.1)
+- [x] **9.5.3** Create `AcademicQueryService` (Constitution 7.1)
+
+### 9.6 Configuration & Testing
+- [x] **9.6.1** Create `pakistani_schemes.json` fixture (Constitution 6.1)
+- [x] **9.6.2** Generate and apply migrations
+- [x] **9.6.3** Implement mandatory tests (Constitution 8.1)
+
+**Phase 9 Status:** [x] Complete (Audit Passed)
+
+---
+
+## PHASE 10: Admissions Module (Constitutional Data Pipeline)
+
+### 10.1 Module Setup
+- [x] **10.1.1** Create `modules/admissions` app structure
+- [x] **10.1.2** Register `modules.admissions` in settings
+- [x] **10.1.3** Define `permissions.py` (view_applications, evaluate_test, make_decision)
+- [x] **10.1.4** Implement `apps.py` (Constitution 5.2)
+
+### 10.2 Data Pipeline Models (Dynamic)
+- [x] **10.2.1** Create `Applicant` (Minimal: name, dob, contact_info)
+- [x] **10.2.2** Create `AdmissionApplication` (JSON payload, schema_version, status)
+- [x] **10.2.3** Create `AdmissionTestResult` (Score, Rank, Source)
+- [x] **10.2.4** Create `InterviewEvaluation` (Remarks, Recommendation, Interviewer FK)
+- [x] **10.2.5** Create `AdmissionDecision` (Accepted/Rejected, Decider FK)
+- [x] **10.2.6** Create migration `0001_initial_admissions`
+
+### 10.3 Service Layer (AuthorizationFacade)
+- [x] **10.3.1** Create `AdmissionsService.submit_application()`
+- [x] **10.3.2** Create `AdmissionsService.evaluate_test()`
+- [x] **10.3.3** Create `AdmissionsService.conduct_interview()`
+- [x] **10.3.4** Create `AdmissionsService.make_decision()`
+- [x] **10.3.5** Implement `convert_to_enrollment()` (Service Call to Academics stub)
+
+### 10.4 Verification (Mandatory Tests)
+- [x] **10.4.1** Verify arbitrary JSON schemas (No hardcoded fields)
+- [x] **10.4.2** Verify complete schema independence between applications
+- [x] **10.4.3** Verify AuthorizationFacade enforcement
+- [x] **10.4.4** Verify handoff state (Status=Accepted)
+
+**Phase 10 Status:** [x] Complete (Constitutional Build)
+
+---
+
+## PHASE 11: Attendance Module (Student Ledger)
+
+### 11.1 Module Setup & Constitution
+- [x] **11.1.1** Create `modules/attendance` app structure
+- [x] **11.1.2** Register `modules.attendance` in settings
+- [x] **11.1.3** Define `permissions.py` (create_session, mark_attendance, etc.)
+- [x] **11.1.4** Implement `apps.py` (Auto-register permissions)
+- [x] **11.1.5** Implement `auth.py` (AuthorizationFacade)
+
+### 11.2 Core Models (The Ledger)
+- [x] **11.2.1** Create `AttendanceSession` (Date, Type, Source, TakenBy)
+- [x] **11.2.2** Create `AttendanceRecord` (Student, Status, MarkedAt)
+- [x] **11.2.3** Add UNIQUE constraint on `AttendanceRecord(session, student)`
+- [x] **11.2.4** Create and apply migrations
+
+### 11.3 Services (Transaction-Safe)
+- [x] **11.3.1** Create `AttendanceSessionService` (Create sessions)
+- [x] **11.3.2** Create `AttendanceMarkingService` (Bulk mark, Validate student in class)
+- [x] **11.3.3** Create `AttendanceQueryService` (Read-only views)
+
+### 11.4 Verification (Strict Tests)
+- [x] **11.4.1** Test: Session creation & Validation
+- [x] **11.4.2** Test: Duplicate record rejection (Unique constraint)
+- [x] **11.4.3** Test: AuthorizationFacade enforcement
+- [x] **11.4.4** Test: Cross-module integrity (Student must be in ClassGroup)
+
+**Phase 11 Status:** [x] Complete (Constitutional Build)
+
+## PHASE 12: Workforce Attendance Module (v1)
+
+### 12.1 Module Setup & Constitution
+- [x] **12.1.1** Create `modules/workforce` app structure
+- [x] **12.1.2** Register `modules.workforce` in settings
+- [x] **12.1.3** Define `permissions.py` (view_attendance, manage_devices)
+- [x] **12.1.4** Implement `apps.py` (Auto-register permissions)
+
+### 12.2 Core Models (Device & Events)
+- [x] **12.2.1** Create `WorkforceAttendanceDevice` (Token Auth)
+- [x] **12.2.2** Create `WorkforceAttendanceEvent` (Check-in/out, Immutable)
+- [x] **12.2.3** Create `WorkforceDailyAttendance` (Aggregated Log)
+- [x] **12.2.4** Create and apply migrations
+
+### 12.3 Services (Device & Ingestion)
+- [x] **12.3.1** Create `DeviceRegistrationService` (Token Generation)
+- [x] **12.3.2** Create `BiometricIngestionService` (Secure Event Logging)
+- [x] **12.3.3** Create `WorkforceAttendanceQueryService` (Read-only)
+
+### 12.4 Verification (Strict Tests)
+- [x] **12.4.1** Test: Device Registration & Auth
+- [x] **12.4.2** Test: Heartbeat Updates
+- [x] **12.4.3** Test: Check-in/Check-out Event Logging
+- [x] **12.4.4** Test: Duplicate Handling & Unauthorized Rejection
+
+**Phase 12 Status:** [x] Complete (Verified)
