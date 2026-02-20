@@ -72,3 +72,36 @@ class AttendanceQueryService:
         if session.campus_id != campus_id:
              raise BusinessRuleViolation("Access denied to session.")
         return session
+
+    @staticmethod
+    def get_summary_by_class_and_date_range(
+        person_id: int,
+        campus_id: int,
+        class_group_id: int,
+        date_from,
+        date_to,
+    ) -> dict:
+        """
+        GAP 3 — Attendance summary aggregated by class group and date range.
+        Returns present, absent, and total session counts.
+
+        Authorization is enforced internally — callers must supply a valid person_id.
+        """
+        AuthorizationFacade.require(person_id, campus_id, 'view_attendance')
+
+        sessions = AttendanceSession.objects.filter(
+            campus_id=campus_id,
+            class_group_id=class_group_id,
+            attendance_date__range=(date_from, date_to),
+        )
+        session_ids = sessions.values_list('id', flat=True)
+
+        records = AttendanceRecord.objects.filter(session_id__in=session_ids)
+
+        return {
+            'total_sessions': sessions.count(),
+            'present': records.filter(status='PRESENT').count(),
+            'absent': records.filter(status='ABSENT').count(),
+            'late': records.filter(status='LATE').count(),
+            'excused': records.filter(status='EXCUSED').count(),
+        }

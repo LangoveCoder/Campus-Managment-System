@@ -6,6 +6,7 @@ Manages assessment instances and results.
 """
 from typing import List, Optional
 from decimal import Decimal
+from datetime import date
 from django.utils import timezone
 from ..auth import AuthorizationFacade
 from ..models import (
@@ -92,3 +93,48 @@ class AssessmentService:
             }
         )
         return result
+
+    @staticmethod
+    def get_results_summary_by_class(
+        person_id: int,
+        campus_id: int,
+        class_group_id: int,
+        assessment_instance_id: int,
+    ) -> dict:
+        """
+        GAP 4 — Aggregated results summary for one assessment instance,
+        scoped to a class group and campus.
+
+        Authorization is enforced internally — callers must supply a valid person_id.
+        Absent students (is_absent=True) are excluded from avg/highest/lowest
+        to avoid distorting statistics.
+        """
+        from django.db.models import Avg, Max, Min
+        AuthorizationFacade.require(
+            person_id=person_id,
+            campus_id=campus_id,
+            permission_code='academics.view_student_results',
+        )
+
+        results = AssessmentResult.objects.filter(
+            campus_id=campus_id,
+            assessment_instance_id=assessment_instance_id,
+            enrollment__class_group_id=class_group_id,
+        )
+
+        total_results = results.count()
+        present_results = results.filter(is_absent=False)
+
+        aggregates = present_results.aggregate(
+            average=Avg('marks_obtained'),
+            highest=Max('marks_obtained'),
+            lowest=Min('marks_obtained'),
+        )
+
+        return {
+            'total_results': total_results,
+            'average': float(aggregates['average']) if aggregates['average'] is not None else None,
+            'highest': float(aggregates['highest']) if aggregates['highest'] is not None else None,
+            'lowest': float(aggregates['lowest']) if aggregates['lowest'] is not None else None,
+            'absent_count': total_results - present_results.count(),
+        }

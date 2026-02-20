@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "modules.admissions",
     "modules.attendance",
     "modules.workforce",
+    "modules.dashboard",
 ]
 
 MIDDLEWARE = [
@@ -59,6 +60,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "kernel.middleware.JWTAuthenticationMiddleware",  # JWT — must be before CampusContext
     "kernel.middleware.CampusContextMiddleware",  # Campus context middleware
 ]
 

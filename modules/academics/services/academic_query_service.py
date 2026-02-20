@@ -5,6 +5,8 @@ Constitution Section 7.1
 Read-only helper methods for academic data.
 """
 from typing import List, Optional
+from django.db.models import Q
+from django.utils import timezone
 from kernel.exceptions import AuthorizationException
 from django.db.models import QuerySet
 from ..auth import AuthorizationFacade
@@ -68,3 +70,35 @@ class AcademicQueryService:
             offerings__teaching_assignments__campus_id=campus_id,
             offerings__teaching_assignments__is_active=True
         ).distinct()
+
+    # -----------------------------------------------------------------------
+    # Campus-level count methods (dashboard use — caller must check auth)
+    # -----------------------------------------------------------------------
+
+    @staticmethod
+    def get_enrolled_student_count(campus_id: int) -> int:
+        """
+        GAP 1 — Total active enrollments scoped to campus.
+        Auth is the caller's responsibility (DashboardHomeView checks before calling).
+        """
+        return Enrollment.objects.filter(
+            campus_id=campus_id,
+            status='ACTIVE',
+        ).count()
+
+    @staticmethod
+    def get_active_class_group_count(campus_id: int) -> int:
+        """
+        GAP 2 — Count of ClassGroups at campus whose AcademicCycle is currently active.
+        'Active' = cycle.is_active is True AND (end_date is null OR end_date >= today).
+        Auth is the caller's responsibility (DashboardHomeView checks before calling).
+        """
+        today = timezone.now().date()
+        return ClassGroup.objects.filter(
+            campus_id=campus_id,
+            is_active=True,
+            academic_cycle__is_active=True,
+        ).filter(
+            Q(academic_cycle__end_date__isnull=True) |
+            Q(academic_cycle__end_date__gte=today)
+        ).count()

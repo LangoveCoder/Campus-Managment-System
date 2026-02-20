@@ -21,5 +21,6 @@ from django.urls import path, include
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),  # Authentication URLs
-    path("", include("kernel.urls")),  # Include kernel URLs
+    path("", include("kernel.urls")),                        # Kernel UI + API
+    path("api/dashboard/", include("modules.dashboard.urls")),  # Dashboard API
 ]

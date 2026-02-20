@@ -98,3 +98,66 @@ class CampusContextMiddleware:
                 return True
         
         return False
+
+
+class JWTAuthenticationMiddleware:
+    """
+    Kernel JWT Authentication Middleware.
+
+    Reads the Authorization: Bearer <token> header, decodes and validates
+    the JWT, resolves the Person from its person_id claim, and injects
+    request.person and request.person_id into the request object.
+
+    Design: PASSIVE. Never raises. Never redirects. Sets to None on any
+    failure and moves on — views are responsible for enforcement.
+
+    Token spec:
+        Algorithm : HS256
+        Secret    : settings.SECRET_KEY
+        Claims    : person_id (str UUID), campus_id, iat, exp
+        Expiry    : 24 hours
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        request.person = None
+        request.person_id = None
+
+        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+        if auth_header.startswith('Bearer '):
+            token = auth_header[len('Bearer '):]
+            self._resolve_person(request, token)
+
+        return self.get_response(request)
+
+    def _resolve_person(self, request, token: str) -> None:
+        """Decode token and hydrate request.person / request.person_id. Silent on failure."""
+        import jwt
+        from django.conf import settings
+        from kernel.models import Person
+
+        try:
+            payload = jwt.decode(
+                token,
+                settings.SECRET_KEY,
+                algorithms=['HS256'],
+            )
+            person_id = payload.get('person_id')
+            if not person_id:
+                return
+
+            person = Person.objects.get(id=person_id)
+            request.person = person
+            request.person_id = person_id
+
+        except jwt.ExpiredSignatureError:
+            pass  # token expired — request.person stays None
+        except jwt.InvalidTokenError:
+            pass  # bad signature, malformed, etc.
+        except Person.DoesNotExist:
+            pass  # person deleted since token was issued
+        except Exception:
+            pass  # catch-all — middleware must never crash a request
+
