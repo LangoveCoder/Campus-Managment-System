@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# FORCE RELOAD 2026-02-23
 """Django's command-line utility for administrative tasks."""
 
 import os

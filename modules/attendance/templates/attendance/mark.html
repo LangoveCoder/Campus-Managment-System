@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Mark Attendance — {{ class_group.name }}{% endblock %}
+{% block page_title %}Mark Attendance: {{ class_group.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .breadcrumb {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .breadcrumb a {
+        color: #3b82f6;
+        text-decoration: none;
+    }
+
+    .breadcrumb .separator::after {
+        content: "→";
+        margin-left: 8px;
+    }
+
+    .form-container {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .form-header {
+        padding: 24px;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+        display: flex;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        text-transform: uppercase;
+    }
+
+    .form-control {
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 14px;
+        color: #1e293b;
+    }
+
+    .student-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .student-table th {
+        text-align: left;
+        padding: 12px 24px;
+        background: #f1f5f9;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+    }
+
+    .student-table td {
+        padding: 16px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 14px;
+        color: #334155;
+    }
+
+    .radio-group {
+        display: flex;
+        gap: 16px;
+    }
+
+    .radio-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+    }
+
+    .form-actions {
+        padding: 24px;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-submit {
+        padding: 10px 24px;
+        background: #10b981;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .btn-submit:hover {
+        background: #059669;
+    }
+
+    .error-msg {
+        padding: 16px 24px;
+        background: #fef2f2;
+        color: #b91c1c;
+        border-bottom: 1px solid #fecaca;
+        font-size: 14px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px;
+        color: #64748b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="/dashboard/">Dashboard</a>
+    <span class="separator"></span>
+    <a href="{% url 'attendance_home' %}">Attendance</a>
+    <span class="separator"></span>
+    <span>{{ class_group.name }}</span>
+</nav>
+
+<div class="form-container">
+    {% if error_message %}
+    <div class="error-msg">
+        {{ error_message }}
+    </div>
+    {% endif %}
+
+    {% if students %}
+    <form method="POST" action="{% url 'mark_attendance' class_group.id %}">
+        {% csrf_token %}
+        <div class="form-header">
+            <div class="form-group">
+                <label for="attendance_date">Attendance Date</label>
+                <input type="date" id="attendance_date" name="attendance_date" class="form-control" value="{{ today }}"
+                    required>
+            </div>
+        </div>
+
+        <table class="student-table">
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Adm #</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.person.full_name }}</td>
+                    <td>{{ student.admission_number }}</td>
+                    <td>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="status_{{ student.id }}" value="PRESENT" checked> Present
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="status_{{ student.id }}" value="ABSENT"> Absent
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="status_{{ student.id }}" value="LATE"> Late
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">Save Attendance</button>
+        </div>
+    </form>
+    {% else %}
+    <div class="empty-state">
+        <p>No students enrolled in this class group yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

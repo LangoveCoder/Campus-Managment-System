@@ -46,6 +46,7 @@ Detailed documentation is available in the `docs/` directory:
 ## 🏗️ Architecture
 
 *   **Kernel:** Modular Monolith (Django) handling Identity, Auth, and Context.
+*   **Modules:** Academics, Admissions, Attendance, Dashboard, Workforce.
 *   **Bridge:** WebSocket service for communicating with local USB hardware.
 *   **Security:** Middleware-enforced Campus Context Isolation.
 

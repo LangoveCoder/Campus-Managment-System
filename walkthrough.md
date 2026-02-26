@@ -94,3 +94,46 @@
 - **Namespacing:** Permissions namespaced (`workforce.*`) to prevent conflicts.
 **Verification:**
 - Validated device registration, token auth, and event ingestion.
+
+---
+
+## Phase 13: Dashboard Integration (API Layer)
+**Goal:** Build the backend infrastructure for the campus dashboard.
+**Outcome:** Implemented read-only JSON API views and filled service gaps in `AcademicQueryService`.
+**Key Features:**
+- Campus summary, attendance, and assessment endpoints.
+- Namespaced permissions for secure cross-module data access.
+
+---
+
+## Phase 14: JWT Authentication
+**Goal:** Add stateless authentication for API clients.
+**Outcome:** Implemented `JWTAuthenticationMiddleware` using PyJWT.
+**Key Features:**
+- Secure login endpoint returning access tokens.
+- Passive middleware for seamless authentication of API requests.
+
+---
+
+## Phase 15: Integration Test Suite
+**Goal:** Prove the system's end-to-end correctness.
+**Outcome:** Passed 36/36 integration tests covering login, permission guards, and dashboard flows.
+
+---
+
+## Phase 16: Dashboard UI & Security Alignment
+**Goal:** Transition to a dedicated, modular HTML UI for the dashboard.
+**Outcome:** Created a professional sidebar layout and server-rendered dashboard home.
+**Key Features:**
+- **[NEW] base.html**: Clean, dark-sidebar layout.
+- **Security:** Secure POST-based logout (Django 5.0).
+- **Admin Access:** Restored access across all 4 campuses via `SUPER_ADMIN` binds.
+
+---
+
+## Phase 17: Academic Seed Data Expansion
+**Goal:** Populate the system with realistic test data.
+**Outcome:** Implemented `seed_dev_data` command and verified dashboard metrics.
+**Key Results:**
+- 10 Students, 3 Class Groups, and 2 Staff verified on the dashboard.
+

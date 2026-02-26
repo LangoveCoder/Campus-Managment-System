@@ -86,3 +86,23 @@ class EnrollmentService:
         enrollment = Enrollment.objects.get(id=enrollment_id, campus_id=campus_id)
         enrollment.status = 'WITHDRAWN'
         enrollment.save()
+
+    @staticmethod
+    def get_enrollment_by_id(
+        enrollment_id: int,
+        campus_id: int,
+        person_id: int,
+    ) -> 'Enrollment':
+        """
+        Return a single Enrollment scoped to campus.
+        Raises django.core.exceptions.ValidationError if not found or wrong campus.
+        Auth is the caller's responsibility — view checks permission before calling.
+        """
+        from django.core.exceptions import ValidationError
+        try:
+            return Enrollment.objects.get(id=enrollment_id, campus_id=campus_id)
+        except Enrollment.DoesNotExist:
+            raise ValidationError(
+                f'Enrollment {enrollment_id} not found at this campus.'
+            )
+

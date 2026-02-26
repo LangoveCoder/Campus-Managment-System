@@ -45,3 +45,14 @@ class DeviceRegistrationService:
         device.save()
         
         return plain_token
+
+    @staticmethod
+    def get_devices(campus_id: int, person_id: int):
+        """
+        Returns all registered devices scoped to campus_id, ordered by name.
+        Auth is the caller's responsibility — view checks permission before calling.
+        """
+        return WorkforceAttendanceDevice.objects.filter(
+            campus_id=campus_id,
+        ).order_by('name')
+

@@ -12,7 +12,7 @@ from django.test import TestCase
 from django.utils import timezone
 from kernel.models import Person, Campus, Role, UserRoleBinding
 from modules.academics.models import (
-    AcademicProgram, AcademicCycle, ClassGroup, 
+    AssessmentScheme, AcademicProgram, AcademicCycle, ClassGroup, 
     StudentProfile, Enrollment
 )
 from modules.academics.services import EnrollmentService
@@ -25,8 +25,8 @@ class EnrollmentTest(TestCase):
         self.campus = Campus.objects.create(name="Campus A")
         self.campus_b = Campus.objects.create(name="Campus B")
         
-        self.registrar = Person.objects.create(full_name="Registrar", primary_email="reg@a.com")
-        self.student_person = Person.objects.create(full_name="Student", primary_email="stu@a.com")
+        self.registrar = Person.objects.create(full_name="Registrar", primary_email="reg@a.com", primary_phone="+923001002001")
+        self.student_person = Person.objects.create(full_name="Student", primary_email="stu@a.com", primary_phone="+923001002002")
         
         # 2. Setup Perms
         # Simulate Registrar having enroll_student permission
@@ -41,7 +41,8 @@ class EnrollmentTest(TestCase):
     def test_duplicate_enrollment_prevention(self):
         """Test that a student cannot be enrolled in two classes in same cycle."""
         # Setup Program/Cycle
-        prog = AcademicProgram.objects.create(campus=self.campus, name="Prog", code="P1", assessment_scheme_id=1)
+        scheme = AssessmentScheme.objects.create(campus=self.campus, name="Test Scheme")
+        prog = AcademicProgram.objects.create(campus=self.campus, name="Prog", code="P1", assessment_scheme=scheme)
         cycle = AcademicCycle.objects.create(campus=self.campus, academic_program=prog, name="C1", sequence=1)
         
         class_a = ClassGroup.objects.create(campus=self.campus, academic_cycle=cycle, name="Class A")

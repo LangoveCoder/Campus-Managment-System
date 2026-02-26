@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance History — {{ enrollment.student_profile.person.full_name }}{% endblock %}
+
+{% block page_title %}Attendance History: {{ enrollment.student_profile.person.full_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .history-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px;
+        margin-bottom: 32px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+    .stat-box {
+        text-align: center;
+    }
+
+    .stat-box.border-right {
+        border-right: 1px solid #cbd5e1;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .stat-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-top: 4px;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: left;
+        padding: 12px 16px;
+        text-transform: uppercase;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .data-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 14px;
+        color: #1e293b;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-present {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .badge-absent {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .badge-late {
+        background: #fef08a;
+        color: #854d0e;
+    }
+
+    .breadcrumb {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .breadcrumb a {
+        color: #3b82f6;
+        text-decoration: none;
+    }
+
+    .breadcrumb .separator::after {
+        content: "→";
+        margin-left: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="{% url 'program_list' %}">Academics</a>
+    <span class="separator"></span>
+    <a href="{% url 'class_detail' enrollment.class_group.id %}">{{ enrollment.class_group.name }}</a>
+    <span class="separator"></span>
+    <span>Attendance History</span>
+</nav>
+
+<div class="history-card">
+    <div class="summary-grid">
+        <div class="stat-box border-right">
+            <div class="stat-value text-success" style="color: #16a34a;">{{ summary.present }}</div>
+            <div class="stat-label">Present</div>
+        </div>
+        <div class="stat-box border-right">
+            <div class="stat-value text-danger" style="color: #dc2626;">{{ summary.absent }}</div>
+            <div class="stat-label">Absent</div>
+        </div>
+        <div class="stat-box border-right">
+            <div class="stat-value text-warning" style="color: #d97706;">{{ summary.late }}</div>
+            <div class="stat-label">Late</div>
+        </div>
+        <div class="stat-box border-right">
+            <div class="stat-value">{{ summary.total }}</div>
+            <div class="stat-label">Total Sessions</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" style="color: #2563eb;">{{ summary.percentage }}%</div>
+            <div class="stat-label">Attendance Rate</div>
+        </div>
+    </div>
+
+    {% if records %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Session Type</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td style="font-weight: 500;">{{ record.session.attendance_date|date:"j M Y" }}</td>
+                <td>{{ record.session.get_session_type_display }}</td>
+                <td>
+                    {% if record.status == 'PRESENT' %}
+                    <span class="badge badge-present">Present</span>
+                    {% elif record.status == 'ABSENT' %}
+                    <span class="badge badge-absent">Absent</span>
+                    {% elif record.status == 'LATE' %}
+                    <span class="badge badge-late">Late</span>
+                    {% else %}
+                    <span class="badge" style="background:#f1f5f9; color:#475569;">{{ record.get_status_display
+                        }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #64748b; text-align: center; padding: 32px 0;">No attendance records found for this student.</p>
+    {% endif %}
+</div>
+{% endblock %}

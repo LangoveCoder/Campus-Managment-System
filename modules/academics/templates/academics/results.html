@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment Results — {{ class_group.name }}{% endblock %}
+
+{% block page_title %}Assessment Results: {{ class_group.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .results-container {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 32px;
+        max-width: 800px;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .form-control {
+        padding: 10px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 14px;
+        min-width: 300px;
+    }
+
+    .btn-submit {
+        padding: 10px 24px;
+        background: #3b82f6;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-submit:hover {
+        background: #2563eb;
+    }
+
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-top: 32px;
+    }
+
+    .stat-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 16px;
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: #64748b;
+        text-transform: uppercase;
+    }
+
+    .breadcrumb {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .breadcrumb a {
+        color: #3b82f6;
+        text-decoration: none;
+    }
+
+    .breadcrumb .separator::after {
+        content: "→";
+        margin-left: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="/dashboard/">Dashboard</a>
+    <span class="separator"></span>
+    <a href="{% url 'program_list' %}">Academics</a>
+    <span class="separator"></span>
+    <a href="{% url 'class_detail' class_group.id %}">{{ class_group.name }}</a>
+    <span class="separator"></span>
+    <span>Results</span>
+</nav>
+
+<div class="results-container">
+    <form method="GET" class="form-group">
+        <label class="form-label" for="instance_id">Select Assessment Instance:</label>
+        <select name="instance_id" id="instance_id" class="form-control" required>
+            <option value="">-- Choose Assessment --</option>
+            {% for instance in instances %}
+            <option value="{{ instance.id }}" {% if request.GET.instance_id|add:"0" == instance.id %}selected{% endif %}>
+                {{ instance.course_offering.course.name }} - {{ instance.assessment_period.name }} (Max: {{ instance.max_marks }})
+            </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn-submit">View Summary</button>
+    </form>
+
+    {% if summary %}
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ summary.average|default:"--"|floatformat:1 }}</div>
+            <div class="stat-label">Average</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ summary.highest|default:"--"|floatformat:1 }}</div>
+            <div class="stat-label">Highest</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ summary.lowest|default:"--"|floatformat:1 }}</div>
+            <div class="stat-label">Lowest</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ summary.total_results }}</div>
+            <div class="stat-label">Total Results</div>
+        </div>
+    </div>
+    {% elif request.GET.instance_id %}
+    <div
+        style="margin-top: 32px; padding: 16px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; border-radius: 6px;">
+        No results found for the selected assessment instance.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

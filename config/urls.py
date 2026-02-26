@@ -21,6 +21,13 @@ from django.urls import path, include
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),  # Authentication URLs
+    path("dashboard/", include("modules.dashboard.urls_html")),  # HTML — no api/ prefix
+    path("academics/", include("modules.academics.urls_html")),
+    path("attendance/", include("modules.attendance.urls_html")),
     path("", include("kernel.urls")),                        # Kernel UI + API
     path("api/dashboard/", include("modules.dashboard.urls")),  # Dashboard API
+    path("api/academics/", include("modules.academics.urls")),  # Academics API
+    path("api/admissions/", include("modules.admissions.urls")),  # Admissions API
+    path("api/attendance/", include("modules.attendance.urls")),  # Attendance API
+    path("api/workforce/", include("modules.workforce.urls")),    # Workforce API
 ]

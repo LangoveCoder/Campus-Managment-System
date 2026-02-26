@@ -6,6 +6,7 @@ Decouples Academic module from Kernel internals.
 Academics never calls kernel authorization services directly.
 """
 from typing import Optional
+from kernel.exceptions import PermissionDeniedException as PermissionDenied
 from kernel.services import AuthorizationService
 
 class AuthorizationFacade:

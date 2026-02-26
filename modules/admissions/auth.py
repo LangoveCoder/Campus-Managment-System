@@ -1,7 +1,7 @@
 
 from typing import Optional
 from kernel.services import AuthorizationService
-from kernel.exceptions import PermissionDenied
+from kernel.exceptions import PermissionDeniedException
 
 class AuthorizationFacade:
     """
@@ -27,7 +27,7 @@ class AuthorizationFacade:
              # If person_id is None, it implies an anonymous request which should generally be denied 
              # for sensitive operations, unless specific logic exists.
              # For now, we enforce person_id for all authorized actions.
-             raise PermissionDenied("Authentication required for this action.")
+             raise PermissionDeniedException(person_id, campus_id, permission_code)
 
         # Implementation Note: 
         # We prepend 'admissions.' to the code if it's a local permission, 

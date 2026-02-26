@@ -13,8 +13,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Create default role-permission mappings."""
         
-        # Get all permissions
-        all_perms = set(Permission.objects.filter(module='kernel').values_list('code', flat=True))
+        # Get all permissions across all modules
+        all_perms = set(Permission.objects.values_list('code', flat=True))
         
         # Define role-permission mappings
         role_permissions = {
@@ -34,6 +34,19 @@ class Command(BaseCommand):
                 'kernel.assign_role',
                 'kernel.revoke_role',
                 'kernel.view_permissions',
+                'academics.view_program',
+                'academics.view_class',
+                'academics.enroll_student',
+                'admissions.view_applicant',
+                'admissions.create_applicant',
+                'admissions.evaluate_test',
+                'admissions.evaluate_interview',
+                'admissions.decide_application',
+                'admissions.convert_to_enrollment',
+                'attendance.view_attendance',
+                'attendance.mark_attendance',
+                'workforce.view_attendance',
+                'workforce.manage_devices',
             },
             
             'REGISTRAR': {
@@ -45,6 +58,12 @@ class Command(BaseCommand):
                 'kernel.change_useraccount',
                 'kernel.view_campus',
                 'kernel.view_role',
+                'academics.view_program',
+                'academics.view_class',
+                'academics.enroll_student',
+                'admissions.view_applicant',
+                'admissions.create_applicant',
+                'admissions.convert_to_enrollment',
             },
             
             'FACULTY': {
@@ -52,16 +71,24 @@ class Command(BaseCommand):
                 'kernel.view_useraccount',
                 'kernel.view_campus',
                 'kernel.view_role',
+                'academics.view_program',
+                'academics.view_class',
+                'attendance.view_attendance',
+                'attendance.mark_attendance',
             },
             
             'STUDENT': {
                 'kernel.view_person',  # Can view own person record
                 'kernel.view_campus',
+                'academics.view_program', # View own program
+                'attendance.view_attendance', # View own attendance
             },
             
             'PARENT': {
                 'kernel.view_person',  # Can view child's person record
                 'kernel.view_campus',
+                'academics.view_program',
+                'attendance.view_attendance',
             },
             
             'ACCOUNTANT': {
@@ -79,6 +106,7 @@ class Command(BaseCommand):
             'SECURITY': {
                 'kernel.view_person',
                 'kernel.view_campus',
+                'attendance.view_attendance', # View gate logs
             },
         }
         

@@ -15,7 +15,7 @@ class AuthorizationFacade:
         Enforce permission requirement via Kernel.
         """
         if not person_id:
-             raise PermissionDenied("Authentication required for this action.")
+             raise PermissionDenied(person_id, campus_id, permission_code)
 
         # Prepend module name to code
         full_permission = f"attendance.{permission_code}"

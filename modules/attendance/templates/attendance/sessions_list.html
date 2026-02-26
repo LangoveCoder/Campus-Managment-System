@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Past Sessions — {{ class_group.name }}{% endblock %}
+
+{% block page_title %}Past Sessions: {{ class_group.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sessions-container {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+    }
+
+    .data-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: left;
+        padding: 12px 16px;
+        text-transform: uppercase;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .data-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
+        font-size: 14px;
+        color: #1e293b;
+    }
+
+    .table-row {
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+
+    .table-row:hover {
+        background-color: #f1f5f9;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-daily {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .badge-period {
+        background: #fef08a;
+        color: #a16207;
+    }
+
+    .badge-subject {
+        background: #e0e7ff;
+        color: #4f46e5;
+    }
+
+    .text-success {
+        color: #16a34a;
+        font-weight: 500;
+    }
+
+    .text-danger {
+        color: #dc2626;
+        font-weight: 500;
+    }
+
+    .breadcrumb {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .breadcrumb a {
+        color: #3b82f6;
+        text-decoration: none;
+    }
+
+    .breadcrumb .separator::after {
+        content: "→";
+        margin-left: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="{% url 'attendance_home' %}">Attendance</a>
+    <span class="separator"></span>
+    <a href="{% url 'attendance_summary' class_group.id %}">{{ class_group.name }}</a>
+    <span class="separator"></span>
+    <span>Past Sessions</span>
+</nav>
+
+<div class="sessions-container">
+    {% if sessions %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Taken By</th>
+                <th>Total Present</th>
+                <th>Total Absent</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for session in sessions %}
+            <tr class="table-row">
+                <td style="font-weight: 500;">{{ session.attendance_date|date:"j M Y" }}</td>
+                <td>
+                    {% if session.session_type == 'DAILY' %}
+                    <span class="badge badge-daily">Daily</span>
+                    {% elif session.session_type == 'PERIOD' %}
+                    <span class="badge badge-period">Period</span>
+                    {% else %}
+                    <span class="badge badge-subject">Subject</span>
+                    {% endif %}
+                </td>
+                <td>{{ session.taken_by.full_name }}</td>
+                <td class="text-success">{{ session.total_present }}</td>
+                <td class="text-danger">{{ session.total_absent }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #64748b; text-align: center; padding: 32px 0;">No past attendance sessions found for this class.
+    </p>
+    {% endif %}
+</div>
+{% endblock %}

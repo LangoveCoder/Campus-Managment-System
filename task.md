@@ -33,6 +33,13 @@
 **Resolution:** Downgraded to Python 3.12.10, recreated virtual environment, reinstalled all dependencies  
 **Status:** ✅ RESOLVED - Admin interface now works perfectly  
 
+### Issue #2: Attendance UI Bugs & Type Mismatches
+**Encountered:** 2026-02-24
+**Error:** Template Syntax errors due to spacing `active_section=='dashboard'`, Double URL Prefixing `/attendance/attendance/`, UUID vs BigInt type mismatch (`student.person_id` passed to BigInt `student_id` field).
+**Root Cause:** Template regex modifications lacked proper caching logic causing reversions; routing prefix replication between parent and child apps; middleware contextual mismatch for HTML/Browser views (JWT `request.person_id` string vs Django ORM `request.user.person.id` UUID); mapping `student.person_id` instead of `student.id` to the `AttendanceRecord` foreign key.
+**Resolution:** Hardcoded `base.html` sidebar spacing and applied comment rules; standardized URL route prefixes; implemented `_get_person_id` helper in HTML views ensuring UUID strings are explicitly extracted, avoiding database field constraint errors; and corrected variable bindings to explicit foreign key types.
+**Status:** ✅ RESOLVED - Browser-based form rendering, submitting, and ledger posting works perfectly
+
 ---
 
 ## PHASE 0: Environment Setup ✅ COMPLETE
@@ -487,3 +494,54 @@
 - [x] **12.4.4** Test: Duplicate Handling & Unauthorized Rejection
 
 **Phase 12 Status:** [x] Complete (Verified)
+
+## PHASE 13: Dashboard Integration — API Layer
+
+- [x] **13.1** Create initial read-only JSON API views
+- [x] **13.2** Implement campus-level summary endpoint (`api/dashboard/home/`)
+- [x] **13.3** Implement attendance aggregate by class endpoint (`api/dashboard/attendance/`)
+- [x] **13.4** Implement assessment results summary endpoint (`api/dashboard/assessments/`)
+- [x] **13.5** Fill service gaps in `AcademicQueryService` and `AttendanceQueryService`
+
+**Phase 13 Status:** [x] Complete (API Ready)
+
+## PHASE 14: JWT Authentication Layer
+
+- [x] **14.1** Install PyJWT and configure `SECRET_KEY`
+- [x] **14.2** Implement `JWTAuthenticationMiddleware` in kernel
+- [x] **14.3** Create login view returning access tokens
+- [x] **14.4** Update dashboard views to require JWT authentication
+
+**Phase 14 Status:** [x] Complete (Secured)
+
+## PHASE 15: Integration Test Suite (Dashboard Flows)
+
+- [x] **15.1** Create `tests/integration/test_dashboard_flows.py`
+- [x] **15.2** Verify unauthenticated and malformed token rejection
+- [x] **15.3** Verify valid token + permission happy path
+- [x] **15.4** Run full end-to-end suite (36/36 Passed)
+
+**Phase 15 Status:** [x] Complete (Proven)
+
+## PHASE 16: Dashboard UI & Security Alignment
+
+- [x] **16.1** Create professional sidebar layout in `templates/base.html`
+- [x] **16.2** Implement server-rendered dashboard home view (`dashboard_home`)
+- [x] **16.3** Design stat cards with Vue.js refresh counter
+- [x] **16.4** Update logout to use secure POST method (Django 5.0)
+- [x] **16.5** Link admin account to all campuses via `SUPER_ADMIN` binds
+
+**Phase 16 Status:** [x] Complete (UI Live)
+
+## PHASE 17: Academic Seed Data Expansion
+
+- [x] **17.1** Create idempotent `seed_dev_data` management command
+- [x] **17.2** Seed Academic Program ("FSc Pre-Engineering") and Cycle
+- [x] **17.3** Seed 3 Class Groups and 10 Student Profiles
+- [x] **17.4** Generate Enrollment ledger records
+- [x] **17.5** Verify Dashboard dashboard reflects: 10 Students, 3 Groups, 2 Staff
+
+**Phase 17 Status:** [x] Complete (Data Powered)
+
+---
+**Current Project Status:** ALL PHASES COMPLETE ✅

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Enroll Student — {{ campus.name }}{% endblock %}
+
+{% block page_title %}Student Enrollment{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 600px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 32px;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .btn-submit {
+        padding: 10px 24px;
+        background: #3b82f6;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-submit:hover {
+        background: #2563eb;
+    }
+
+    .alert {
+        padding: 12px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        margin-bottom: 24px;
+    }
+
+    .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .breadcrumb {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .breadcrumb a {
+        color: #3b82f6;
+        text-decoration: none;
+    }
+
+    .breadcrumb .separator::after {
+        content: "→";
+        margin-left: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="/dashboard/">Dashboard</a>
+    <span class="separator"></span>
+    <a href="{% url 'program_list' %}">Academics</a>
+    <span class="separator"></span>
+    <span>Enroll Student</span>
+</nav>
+
+<div class="form-container">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-error{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="form-label" for="class_group_id">Select Class Group</label>
+            <select name="class_group_id" id="class_group_id" class="form-control" required>
+                <option value="">-- Choose Class --</option>
+                {% for class in classes %}
+                <option value="{{ class.id }}" {% if request.GET.class_id|add:"0" == class.id %}selected{% endif %}>
+                    {{ class.name }} ({{ class.academic_cycle.name }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="student_person_id">Student Person ID (UUID)</label>
+            <input type="text" name="student_person_id" id="student_person_id" class="form-control"
+                placeholder="e.g. 523a693c-..." required>
+            <small style="color: #64748b; font-size: 12px; display: block; margin-top: 4px;">
+                Enter the UUID of the person you wish to enroll.
+            </small>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">Complete Enrollment</button>
+            <a href="{% url 'program_list' %}"
+                style="margin-left: 16px; color: #64748b; font-size: 14px; text-decoration: none;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

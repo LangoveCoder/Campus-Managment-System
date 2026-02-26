@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}{{ program.name }} — Cycles & Classes{% endblock %}
+
+{% block page_title %}{{ program.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cycle-section {
+        margin-bottom: 32px;
+    }
+
+    .cycle-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .cycle-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .cycle-meta {
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .classes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .class-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 20px;
+        transition: transform 0.1s;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .class-card:hover {
+        border-color: #3b82f6;
+        background: #f8fafc;
+    }
+
+    .class-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #3b82f6;
+        margin-bottom: 8px;
+    }
+
+    .class-stats {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .breadcrumb {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .breadcrumb a {
+        color: #3b82f6;
+        text-decoration: none;
+    }
+
+    .breadcrumb .separator::after {
+        content: "→";
+        margin-left: 8px;
+    }
+
+    .empty-state {
+        padding: 24px;
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        text-align: center;
+        color: #64748b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="/dashboard/">Dashboard</a>
+    <span class="separator"></span>
+    <a href="{% url 'program_list' %}">Academics</a>
+    <span class="separator"></span>
+    <span>{{ program.name }}</span>
+</nav>
+
+{% if cycle_data %}
+{% for item in cycle_data %}
+<div class="cycle-section">
+    <div class="cycle-header">
+        <h2 class="cycle-title">{{ item.cycle.name }}</h2>
+        <div class="cycle-meta">
+            Sequence: {{ item.cycle.sequence }} |
+            {% if item.cycle.is_active %}
+            <span style="color: #10b981;">Active</span>
+            {% else %}
+            <span style="color: #64748b;">Inactive</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if item.classes %}
+    <div class="classes-grid">
+        {% for class in item.classes %}
+        <a href="{% url 'class_detail' class.id %}" class="class-card">
+            <div class="class-name">{{ class.name }}</div>
+            <div class="class-stats">
+                Capacity: {{ class.capacity|default:"—" }}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        No class groups defined for this cycle.
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+{% else %}
+<div class="empty-state" style="padding: 48px;">
+    No academic cycles found for this program.
+</div>
+{% endif %}
+{% endblock %}

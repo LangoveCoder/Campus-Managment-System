@@ -73,3 +73,81 @@ def login_view(request):
         'person_id': str(person.id),
         'name': person.full_name,
     })
+
+
+@csrf_exempt
+@require_POST
+def set_campus_view(request):
+    """
+    POST api/auth/set-campus/
+
+    Writes current_campus_id into the session so subsequent API calls
+    have campus context (CampusContextMiddleware reads from session).
+
+    Required for JWT/Flutter clients — browsers use the campus picker UI instead.
+
+    Body: { "campus_id": int }
+
+    Responses:
+        200  { "status": "ok", "campus_id": int }
+        400  Missing campus_id
+        401  No valid JWT (request.person_id is None)
+        403  Person has no active UserRoleBinding at that campus
+        404  Campus does not exist
+    """
+    from django.utils import timezone
+    from kernel.models import Campus, UserRoleBinding
+
+    # 1. JWT auth check — person_id is set by JWTAuthenticationMiddleware
+    person_id = getattr(request, 'person_id', None)
+    if not person_id:
+        return JsonResponse(
+            {'error': 'Unauthorized', 'detail': 'Valid Bearer token required.'},
+            status=401,
+        )
+
+    # 2. Parse body
+    try:
+        body = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON body.'}, status=400)
+
+    campus_id = body.get('campus_id')
+    if campus_id is None:
+        return JsonResponse({'error': 'campus_id is required.'}, status=400)
+
+    try:
+        campus_id = int(campus_id)
+    except (TypeError, ValueError):
+        return JsonResponse({'error': 'campus_id must be an integer.'}, status=400)
+
+    # 3. Campus must exist
+    try:
+        campus = Campus.objects.get(id=campus_id)
+    except Campus.DoesNotExist:
+        return JsonResponse({'error': f'Campus {campus_id} not found.'}, status=404)
+
+    # 4. Person must have at least one active binding at this campus
+    #    Uses the same temporal validity pattern as UserRoleBinding everywhere else.
+    has_binding = UserRoleBinding.objects.filter(
+        person_id=person_id,
+        campus_id=campus_id,
+        is_active=True,
+        validity__contains=timezone.now(),
+    ).exists()
+
+    if not has_binding:
+        return JsonResponse(
+            {
+                'error': 'Forbidden',
+                'detail': f'No active role at campus {campus.name}.',
+            },
+            status=403,
+        )
+
+    # 5. Write to session — CampusContextMiddleware reads this on every request
+    request.session['current_campus_id'] = campus_id
+    request.session.modified = True
+
+    return JsonResponse({'status': 'ok', 'campus_id': campus_id})
+

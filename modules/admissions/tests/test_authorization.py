@@ -1,10 +1,10 @@
 
 from django.test import TestCase
-from kernel.models import Person, Campus, Role, UserRoleBinding
+from kernel.models import Person, Campus, Role, UserRoleBinding, RolePermissionMap
 from kernel.services import AuthorizationService
 from modules.admissions.models import Applicant, AdmissionApplication
 from modules.admissions.services import AdmissionsService
-from kernel.exceptions import PermissionDenied
+from kernel.exceptions import PermissionDeniedException as PermissionDenied
 import datetime
 from django.apps import apps
 
@@ -13,28 +13,27 @@ class AuthorizationTests(TestCase):
         Permission = apps.get_model('kernel', 'Permission')
         # 1. Setup Campus and Person
         self.campus = Campus.objects.create(name="Auth Test Campus", campus_type="PHYSICAL")
-        self.person = Person.objects.create(full_name="Staff User", primary_email="staff@example.com")
-        self.unauthorized_person = Person.objects.create(full_name="Rando", primary_email="rando@example.com")
+        self.person = Person.objects.create(full_name="Staff User", primary_email="staff@example.com", primary_phone="+923001003001")
+        self.unauthorized_person = Person.objects.create(full_name="Rando", primary_email="rando@example.com", primary_phone="+923001003002")
         
         # 2. Create Application to act upon
         self.applicant = Applicant.objects.create(full_name="Test Applicant", date_of_birth="2000-01-01", campus=self.campus)
         self.application = AdmissionApplication.objects.create(applicant=self.applicant, campus=self.campus, status="SUBMITTED")
         
         # 3. Define Permissions
-        self.perm_evaluate = Permission.objects.create(module="admissions", code="evaluate_test", name="Evaluate")
-        self.perm_decide = Permission.objects.create(module="admissions", code="make_decision", name="Decide")
+        self.perm_evaluate, _ = Permission.objects.get_or_create(module="admissions", code="admissions.evaluate_test", defaults={"name": "Evaluate"})
+        self.perm_decide, _ = Permission.objects.get_or_create(module="admissions", code="admissions.make_decision", defaults={"name": "Decide"})
         
         # 4. Assign Role to Person (Admissions Officer)
         self.role = Role.objects.create(name="Admissions Officer")
-        self.role.permissions.add(self.perm_evaluate, self.perm_decide)
+        RolePermissionMap.objects.create(role=self.role, permission=self.perm_evaluate)
+        RolePermissionMap.objects.create(role=self.role, permission=self.perm_decide)
         
         # 5. Bind Person to Role at Campus
         UserRoleBinding.objects.create(
             person=self.person,
             role=self.role,
             campus=self.campus,
-            valid_from=datetime.date.today(),
-            valid_until=None
         )
 
     def test_authorized_action(self):

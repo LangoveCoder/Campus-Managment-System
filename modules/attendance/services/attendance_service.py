@@ -105,3 +105,46 @@ class AttendanceQueryService:
             'late': records.filter(status='LATE').count(),
             'excused': records.filter(status='EXCUSED').count(),
         }
+
+    @staticmethod
+    def get_sessions_for_class(person_id: int, campus_id: int, class_group_id: int):
+        from django.db.models import Count, Q
+        AuthorizationFacade.require(person_id, campus_id, 'view_attendance')
+        return AttendanceSession.objects.filter(
+            campus_id=campus_id,
+            class_group_id=class_group_id
+        ).select_related('taken_by', 'class_group').annotate(
+            total_present=Count('records', filter=Q(records__status='PRESENT')),
+            total_absent=Count('records', filter=Q(records__status='ABSENT'))
+        ).order_by('-attendance_date', '-created_at')
+
+    @staticmethod
+    def get_student_attendance_history(person_id: int, campus_id: int, enrollment_id: int) -> dict:
+        AuthorizationFacade.require(person_id, campus_id, 'view_attendance')
+
+        records = AttendanceRecord.objects.filter(
+            campus_id=campus_id,
+            student__enrollments__id=enrollment_id,
+        ).select_related('session').order_by('-session__attendance_date')
+
+        total = records.count()
+        present = records.filter(status='PRESENT').count()
+        absent = records.filter(status='ABSENT').count()
+        late = records.filter(status='LATE').count()
+        
+        percentage = 0
+        if total > 0:
+            percentage = round(((present + late) / total) * 100, 1)
+
+        summary = {
+            'present': present,
+            'absent': absent,
+            'late': late,
+            'total': total,
+            'percentage': percentage
+        }
+
+        return {
+            'records': records,
+            'summary': summary
+        }

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Dashboard{% endblock %}
+{% block page_title %}Attendance{% endblock %}
+
+{% block extra_css %}
+<style>
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 24px;
+    }
+
+    .class-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .class-card-header {
+        margin-bottom: 16px;
+    }
+
+    .class-card-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 4px;
+    }
+
+    .class-card-meta {
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .class-card-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: auto;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        text-align: center;
+        flex: 1;
+    }
+
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #2563eb;
+    }
+
+    .btn-secondary {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .btn-secondary:hover {
+        background: #e2e8f0;
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 48px;
+        background: white;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        color: #64748b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="grid">
+    {% if class_groups %}
+    {% for cg in class_groups %}
+    <div class="class-card">
+        <div class="class-card-header">
+            <div class="class-card-title">{{ cg.name }}</div>
+            <div class="class-card-meta">{{ cg.academic_cycle.academic_program.name }} - {{ cg.academic_cycle.name }}
+            </div>
+        </div>
+        <div class="class-card-actions">
+            <a href="{% url 'mark_attendance' cg.id %}" class="btn btn-primary">Mark Attendance</a>
+            <a href="{% url 'attendance_summary' cg.id %}" class="btn btn-secondary">View Summary</a>
+        </div>
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #f1f5f9; text-align: center;">
+            <a href="{% url 'session_list' cg.id %}"
+                style="font-size: 13px; color: #3b82f6; text-decoration: none; font-weight: 500;">View Past Sessions
+                →</a>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <p>No active class groups found for this campus.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

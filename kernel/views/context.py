@@ -34,7 +34,7 @@ def select_campus(request):
             if int(campus_id) in campus_ids:
                 # Set campus in session
                 request.session['current_campus_id'] = int(campus_id)
-                return redirect('kernel:dashboard')
+                return redirect('/dashboard/')
     
     # GET request - show campus selection form
     person = request.user.person
@@ -94,23 +94,3 @@ def switch_campus(request):
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
-
-@login_required
-def dashboard(request):
-    """
-    Placeholder dashboard view.
-    
-    This will be replaced with actual dashboard in future phases.
-    """
-    campus_id = request.session.get('current_campus_id')
-    
-    if not campus_id:
-        return redirect('kernel:select_campus')
-    
-    from kernel.models import Campus
-    campus = Campus.objects.get(id=campus_id)
-    
-    return render(request, 'kernel/dashboard.html', {
-        'campus': campus,
-        'title': 'Dashboard'
-    })

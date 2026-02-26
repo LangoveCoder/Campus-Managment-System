@@ -47,8 +47,15 @@ This document explains **how the entire Campus Management Platform works** - fro
 - **Temporal Integrity:** Replaced `valid_from`/`valid_until` with `validity` (DateTimeRangeField) to strictly prevent overlaps.
 - **Hardening:** Added GIST index for performance, set default validity to `[now, infinity)`, and enforced deactivation-closes-range rule.
 
+### ✅ Completed (Phases 13 - 17)
+- **Dashboard API:** 3 secure JSON endpoints for campus metrics.
+- **JWT Authentication:** Stateless token-based security for API clients via `JWTAuthenticationMiddleware`.
+- **HTML Dashboard:** Modular server-rendered UI in `modules/dashboard` with direct service integration.
+- **Seeded Data:** Full academic records (10 students, 3 groups, 10 enrollments) verified via `seed_dev_data` command.
+- **Security Alignment:** Sign-out button updated to POST form across all UI templates.
+
 ### 🏁 Project Status
-- **System is Production Ready.**
+- **System is Production Ready and Verified.**
 
 ---
 
@@ -558,3 +565,30 @@ Academics Module (StudentProfile Created)
 1.  **Dynamic Schema:** No fixed fields for application forms.
 2.  **Kernel Decoupling:** Uses `AuthorizationFacade` for all checks.
 3.  **Strict Handoff:** Admissions = "Decide", Academics = "Enroll".
+
+---
+
+## 16. Context Resolution (JWT vs HTML Sessions)
+
+### Architectural Distinction
+The platform uses two distinct methods for authenticating requests and establishing the `person_id`.
+
+**1. API Endpoints (Bearer Token)**
+*   Handled by `JWTAuthenticationMiddleware`
+*   Extracts `person_id` directly from the validated JWT payload (UUID String).
+*   Accessible in views as `request.person_id`.
+*   Used by all JSON API endpoints (e.g., Flutter mobile apps).
+
+**2. Server-Rendered HTML Views (Browser Session)**
+*   Handled by Django's native session authentication and `CampusContextMiddleware`.
+*   Browsers do not send Bearer tokens; they rely on session cookies.
+*   `request.person_id` is typically `None` in this context.
+*   Views must explicitly extract the person ID from the Django ORM user model:
+
+```python
+def _get_person_id(request):
+    person = getattr(request.user, 'person', None)
+    return str(person.id) if person else None
+```
+
+*   **CRITICAL CONSTRAINT:** `person.id` natively returns a UUID object. It **MUST** be coerced to a string (`str(person.id)`) before being passed to Service layers. If passed as a raw UUID object, underlying PostgreSQL relations mapping to BigInt auto-fields (like `StudentProfile`) will collapse with `BigInt out of range` errors.

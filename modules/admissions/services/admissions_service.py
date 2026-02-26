@@ -184,3 +184,35 @@ class AdmissionsService:
             "status": "success", 
             "message": f"Application {application_id} queued for enrollment in Academics."
         }
+
+    @staticmethod
+    def get_applications(campus_id: int, person_id: int):
+        """
+        Returns all AdmissionApplications scoped to campus_id, newest first.
+        Auth is the caller's responsibility — view checks permission before calling.
+        """
+        return AdmissionApplication.objects.filter(
+            campus_id=campus_id,
+        ).select_related('applicant').order_by('-submitted_at')
+
+    @staticmethod
+    def get_application_by_id(
+        application_id: int,
+        campus_id: int,
+        person_id: int,
+    ) -> AdmissionApplication:
+        """
+        Returns a single AdmissionApplication scoped to campus.
+        Raises ValidationError if not found or campus mismatch.
+        Auth is the caller's responsibility — view checks permission before calling.
+        """
+        try:
+            return AdmissionApplication.objects.select_related('applicant').get(
+                id=application_id,
+                campus_id=campus_id,
+            )
+        except AdmissionApplication.DoesNotExist:
+            raise ValidationError(
+                f'Application {application_id} not found at this campus.'
+            )
+

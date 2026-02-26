@@ -102,3 +102,41 @@ class AcademicQueryService:
             Q(academic_cycle__end_date__isnull=True) |
             Q(academic_cycle__end_date__gte=today)
         ).count()
+
+    # -----------------------------------------------------------------------
+    # Navigation hierarchy (API layer — auth is caller's responsibility)
+    # -----------------------------------------------------------------------
+
+    @staticmethod
+    def get_programs(campus_id: int) -> QuerySet:
+        """
+        Returns all active AcademicPrograms scoped to campus_id.
+        Auth is the caller's responsibility — the view checks permission
+        before calling this method.
+        """
+        from ..models import AcademicProgram
+        return AcademicProgram.objects.filter(campus_id=campus_id, is_active=True)
+
+    @staticmethod
+    def get_cycles_for_program(program_id: int, campus_id: int) -> QuerySet:
+        """
+        Returns all AcademicCycles for the given program, scoped to campus.
+        Auth is the caller's responsibility.
+        """
+        return AcademicCycle.objects.filter(
+            campus_id=campus_id,
+            academic_program_id=program_id,
+        ).order_by('sequence')
+
+    @staticmethod
+    def get_classes_for_cycle(cycle_id: int, campus_id: int) -> QuerySet:
+        """
+        Returns all active ClassGroups for the given cycle, scoped to campus.
+        Auth is the caller's responsibility.
+        """
+        return ClassGroup.objects.filter(
+            campus_id=campus_id,
+            academic_cycle_id=cycle_id,
+            is_active=True,
+        )
+
