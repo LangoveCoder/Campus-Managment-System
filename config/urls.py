@@ -24,6 +24,8 @@ urlpatterns = [
     path("dashboard/", include("modules.dashboard.urls_html")),  # HTML — no api/ prefix
     path("academics/", include("modules.academics.urls_html")),
     path("attendance/", include("modules.attendance.urls_html")),
+    path("admissions/", include("modules.admissions.urls_html")),
+    path("workforce/", include("modules.workforce.urls_html")),
     path("", include("kernel.urls")),                        # Kernel UI + API
     path("api/dashboard/", include("modules.dashboard.urls")),  # Dashboard API
     path("api/academics/", include("modules.academics.urls")),  # Academics API

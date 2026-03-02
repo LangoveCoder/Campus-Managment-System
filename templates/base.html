@@ -164,21 +164,25 @@
 
     <nav class="sidebar-nav">
       {# RULE: always use spaces around == in Django template tags #}
-      <a href="/dashboard/" {% if active_section == 'dashboard' %}class="active" {% endif %}>
+      <a href="/dashboard/" {% if active_section == 'dashboard' %} class="active" {% endif %}>
         Dashboard
       </a>
       {# RULE: always use spaces around == in Django template tags #}
-      <a href="/academics/" {% if active_section == 'academics' %}class="active" {% endif %}>
+      <a href="/academics/" {% if active_section == 'academics' %} class="active" {% endif %}>
         Academics
       </a>
       {# RULE: always use spaces around == in Django template tags #}
-      <a href="#">Admissions</a>
+      <a href="/admissions/" {% if active_section == 'admissions' %} class="active" {% endif %}>
+        Admissions
+      </a>
       {# RULE: always use spaces around == in Django template tags #}
-      <a href="/attendance/" {% if active_section == 'attendance' %}class="active" {% endif %}>
+      <a href="/attendance/" {% if active_section == 'attendance' %} class="active" {% endif %}>
         Attendance
       </a>
       {# RULE: always use spaces around == in Django template tags #}
-      <a href="#">Workforce</a>
+      <a href="/workforce/" {% if active_section == 'workforce' %} class="active" {% endif %}>
+        Workforce
+      </a>
     </nav>
 
     <style>

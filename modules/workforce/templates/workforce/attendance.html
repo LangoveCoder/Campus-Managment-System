@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Workforce Attendance Summary{% endblock %}
+{% block page_title %}Attendance Summary{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filter-panel {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+        display: flex;
+        gap: 16px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+        font-weight: 500;
+        color: #475569;
+    }
+
+    .form-group input {
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .btn-filter {
+        background: #3b82f6;
+        color: white;
+        padding: 11px 24px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .data-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: left;
+        padding: 14px 20px;
+        text-transform: uppercase;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .data-table td {
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 14px;
+        color: #1e293b;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-present {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .badge-absent {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px;
+        background: white;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        color: #64748b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if error %}
+<div
+    style="background:#fee2e2;color:#991b1b;padding:16px;border-radius:6px;margin-bottom:24px;border:1px solid #fecaca;">
+    {{ error }}</div>
+{% endif %}
+
+<form class="filter-panel" method="GET">
+    <div class="form-group">
+        <label>Start Date</label>
+        <input type="date" name="start_date" value="{{ start_date }}">
+    </div>
+    <div class="form-group">
+        <label>End Date</label>
+        <input type="date" name="end_date" value="{{ end_date }}">
+    </div>
+    <button type="submit" class="btn-filter">Filter</button>
+</form>
+
+{% if results %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Staff Member</th>
+            <th>Check-Ins</th>
+            <th>Check-Outs</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in results %}
+        <tr>
+            <td style="font-weight:500;">{{ row.full_name }}</td>
+            <td>{{ row.total_in }}</td>
+            <td>{{ row.total_out }}</td>
+            <td>
+                {% if row.total_in > 0 %}
+                <span class="badge badge-present">Present</span>
+                {% else %}
+                <span class="badge badge-absent">Absent</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty-state">
+    <p>No attendance records found for this period.</p>
+</div>
+{% endif %}
+{% endblock %}

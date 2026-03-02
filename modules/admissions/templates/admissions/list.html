@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Admissions Dashboard{% endblock %}
+
+{% block page_title %}Admissions Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .data-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: left;
+        padding: 14px 20px;
+        text-transform: uppercase;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .data-table td {
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 14px;
+        color: #1e293b;
+    }
+
+    .data-table tr:hover {
+        background-color: #f8fafc;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .status-pending {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .status-interviewed {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .status-accepted {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .status-rejected {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .status-waitlisted {
+        background: #fef08a;
+        color: #a16207;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px;
+        background: white;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        color: #64748b;
+    }
+
+    .btn-link {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .btn-link:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% if error %}
+<div
+    style="background: #fee2e2; color: #991b1b; padding: 16px; border-radius: 6px; margin-bottom: 24px; border: 1px solid #fecaca;">
+    {{ error }}
+</div>
+{% endif %}
+
+{% if applications %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Applicant Name</th>
+            <th>Submitted Date</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for app in applications %}
+        <tr>
+            <td style="font-weight: 500;">{{ app.form_payload.full_name }}</td>
+            <td>{{ app.submitted_at|date:"j M Y, g:i a" }}</td>
+            <td>
+                {% if app.status == 'PENDING' %}<span class="badge status-pending">Pending</span>{% endif %}
+                {% if app.status == 'INTERVIEWED' %}<span class="badge status-interviewed">Interviewed</span>{% endif %}
+                {% if app.status == 'TESTED' %}<span class="badge status-interviewed">Tested</span>{% endif %}
+                {% if app.status == 'ACCEPTED' %}<span class="badge status-accepted">Accepted</span>{% endif %}
+                {% if app.status == 'REJECTED' %}<span class="badge status-rejected">Rejected</span>{% endif %}
+                {% if app.status == 'WAITLISTED' %}<span class="badge status-waitlisted">Waitlisted</span>{% endif %}
+                {% if app.status == 'SUBMITTED' %}<span class="badge status-pending">Submitted</span>{% endif %}
+                {% if app.status == 'ENROLLED' %}<span class="badge status-accepted">Enrolled</span>{% endif %}
+            </td>
+            <td>
+                <a href="{% url 'application_detail' app.id %}" class="btn-link">View Detail →</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty-state">
+    <p>No admission applications found for this campus.</p>
+</div>
+{% endif %}
+
+{% endblock %}

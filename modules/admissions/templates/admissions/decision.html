@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Make Decision — {{ application.form_payload.full_name }}{% endblock %}
+
+{% block page_title %}Make Decision{% endblock %}
+
+{% block extra_css %}
+<style>
+    .breadcrumb {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .breadcrumb a {
+        color: #3b82f6;
+        text-decoration: none;
+    }
+
+    .breadcrumb .separator::after {
+        content: "→";
+        margin-left: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="/dashboard/">Dashboard</a>
+    <span class="separator"></span>
+    <a href="{% url 'applications_list' %}">Admissions</a>
+    <span class="separator"></span>
+    <a href="{% url 'application_detail' application.id %}">{{ application.form_payload.full_name }}</a>
+    <span class="separator"></span>
+    <span>Final Decision</span>
+</nav>
+
+{% if error %}
+<div
+    style="background: #fee2e2; color: #991b1b; padding: 16px; border-radius: 6px; margin-bottom: 24px; border: 1px solid #fecaca;">
+    {{ error }}
+</div>
+{% endif %}
+
+<div style="background: white; padding: 32px; border-radius: 8px; border: 1px solid #e2e8f0; max-width: 600px;">
+    <h2 style="margin-top: 0; font-size: 18px; color: #1e293b;">Final Verdict: {{ application.form_payload.full_name }}
+    </h2>
+    <form method="POST" style="margin-top: 24px;">
+        {% csrf_token %}
+        <div style="margin-bottom: 20px;">
+            <label
+                style="display: block; font-size: 14px; font-weight: 500; color: #475569; margin-bottom: 8px;">Decision</label>
+            <select name="decision" required
+                style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; box-sizing: border-box; background: white;">
+                <option value="">-- Select Decision --</option>
+                <option value="ACCEPTED">ACCEPTED</option>
+                <option value="REJECTED">REJECTED</option>
+                <option value="WAITLISTED">WAITLISTED</option>
+            </select>
+        </div>
+        <div style="margin-bottom: 24px;">
+            <label
+                style="display: block; font-size: 14px; font-weight: 500; color: #475569; margin-bottom: 8px;">Official
+                Comments</label>
+            <textarea name="notes" rows="4"
+                style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; box-sizing: border-box;"></textarea>
+        </div>
+
+        <button type="submit"
+            style="background: #3b82f6; color: white; border: none; padding: 10px 20px; font-weight: 500; border-radius: 6px; cursor: pointer;">Finalize
+            Decision</button>
+        <a href="{% url 'application_detail' application.id %}"
+            style="margin-left: 12px; color: #64748b; text-decoration: none; font-size: 14px;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

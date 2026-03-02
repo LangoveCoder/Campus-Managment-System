@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply for Admission</title>
+    <style>
+        body { font-family: 'Inter', -apple-system, sans-serif; background: #f8fafc; display: flex; justify-content: center; padding: 48px 24px; color: #1e293b; margin: 0; }
+        .card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 32px; width: 100%; max-width: 400px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        h1 { font-size: 24px; font-weight: 600; margin-top: 0; margin-bottom: 24px; color: #0f172a; text-align: center; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #475569; }
+        input[type="text"] { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; box-sizing: border-box; }
+        input[type="text"]:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .btn { width: 100%; background: #3b82f6; color: white; padding: 12px; border: none; border-radius: 6px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+        .btn:hover { background: #2563eb; }
+        .alert { padding: 16px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; text-align: center; }
+        .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Admission Application</h1>
+        
+        {% if error %}
+        <div class="alert alert-error">{{ error }}</div>
+        {% endif %}
+        
+        {% if success %}
+        <div class="alert alert-success">
+            <strong>Success!</strong><br><br>
+            Your application has been submitted.<br>
+            Reference: <strong>#{{ application_id }}</strong>
+        </div>
+        {% else %}
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <input type="text" id="full_name" name="full_name" required placeholder="John Doe">
+            </div>
+            <button type="submit" class="btn">Submit Application</button>
+        </form>
+        {% endif %}
+    </div>
+</body>
+</html>

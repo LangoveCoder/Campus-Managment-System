@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Workforce Dashboard{% endblock %}
+{% block page_title %}Workforce Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    .stat-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        font-size: 36px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .action-panel {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 24px;
+    }
+
+    .action-header {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .quick-links {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .quick-link-btn {
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        color: #3b82f6;
+        padding: 12px 24px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .quick-link-btn:hover {
+        background: #eff6ff;
+        border-color: #93c5fd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if error %}
+<div
+    style="background:#fee2e2;color:#991b1b;padding:16px;border-radius:6px;margin-bottom:24px;border:1px solid #fecaca;">
+    {{ error }}</div>
+{% endif %}
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total Staff</div>
+        <div class="stat-value">{{ total_staff }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Present Today</div>
+        <div class="stat-value" style="color:#10b981;">{{ present_today }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Absent Today</div>
+        <div class="stat-value" style="color:#ef4444;">{{ absent }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Late Arrivals</div>
+        <div class="stat-value" style="color:#f59e0b;">{{ late }}</div>
+    </div>
+</div>
+
+<div class="action-panel">
+    <div class="action-header">Quick Access</div>
+    <div class="quick-links">
+        <a href="{% url 'workforce_attendance' %}" class="quick-link-btn">Attendance Summary</a>
+        <a href="{% url 'workforce_log' %}" class="quick-link-btn">Raw Event Log</a>
+        <a href="{% url 'workforce_devices' %}" class="quick-link-btn">Manage Devices</a>
+    </div>
+</div>
+{% endblock %}

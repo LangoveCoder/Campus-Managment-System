@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Workforce Event Log{% endblock %}
+{% block page_title %}Raw Punch Event Log{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filter-panel {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+        display: flex;
+        gap: 16px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+        font-weight: 500;
+        color: #475569;
+    }
+
+    .form-group input {
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .btn-filter {
+        background: #3b82f6;
+        color: white;
+        padding: 11px 24px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .data-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: left;
+        padding: 14px 20px;
+        text-transform: uppercase;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .data-table td {
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 14px;
+        color: #1e293b;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px;
+        background: white;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        color: #64748b;
+    }
+
+    .type-CHECK_IN {
+        color: #16a34a;
+        font-weight: 600;
+    }
+
+    .type-CHECK_OUT {
+        color: #dc2626;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if error %}
+<div
+    style="background:#fee2e2;color:#991b1b;padding:16px;border-radius:6px;margin-bottom:24px;border:1px solid #fecaca;">
+    {{ error }}</div>
+{% endif %}
+
+<form class="filter-panel" method="GET">
+    <div class="form-group">
+        <label>Start Date</label>
+        <input type="date" name="start_date" value="{{ start_date }}">
+    </div>
+    <div class="form-group">
+        <label>End Date</label>
+        <input type="date" name="end_date" value="{{ end_date }}">
+    </div>
+    <button type="submit" class="btn-filter">Filter</button>
+</form>
+
+{% if logs %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>Person ID</th>
+            <th>Event Type</th>
+            <th>Device</th>
+            <th>Method</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.event_time|date:"Y-m-d H:i:s" }}</td>
+            <td style="font-family:monospace;">{{ log.person_id }}</td>
+            <td class="type-{{ log.event_type }}">{{ log.event_type }}</td>
+            <td>{{ log.device.name }}</td>
+            <td>{{ log.verification_method }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty-state">
+    <p>No punch events found for this filter.</p>
+</div>
+{% endif %}
+{% endblock %}

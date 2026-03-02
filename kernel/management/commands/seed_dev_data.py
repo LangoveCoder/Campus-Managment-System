@@ -222,6 +222,73 @@ class Command(BaseCommand):
                 
         self.stdout.write(f"Added {results_created} assessment results.")
 
+        
+        # --- ADMISSIONS SEED DATA ---
+        from modules.admissions.models import Applicant, AdmissionApplication
+        from kernel.models import Permission, RolePermissionMap
+        applicant_ali, _ = Applicant.objects.get_or_create(
+            full_name='Ali Hassan',
+            defaults={
+                'date_of_birth': '2010-01-01',
+                'campus': campus,
+                'contact_info': {},
+                'guardian_info': {}
+            }
+        )
+        
+        applicant_sara, _ = Applicant.objects.get_or_create(
+            full_name='Sara Khan',
+            defaults={
+                'date_of_birth': '2010-02-02',
+                'campus': campus,
+                'contact_info': {},
+                'guardian_info': {}
+            }
+        )
+        
+        app_ali, _ = AdmissionApplication.objects.get_or_create(
+            applicant=applicant_ali,
+            campus=campus,
+            defaults={
+                'form_payload': {'full_name': 'Ali Hassan'},
+                'status': 'PENDING'
+            }
+        )
+        
+        app_sara, _ = AdmissionApplication.objects.get_or_create(
+            applicant=applicant_sara,
+            campus=campus,
+            defaults={
+                'form_payload': {'full_name': 'Sara Khan'},
+                'status': 'INTERVIEWED'
+            }
+        )
+        
+        admin_role = Role.objects.get(name='SUPER_ADMIN')
+        for codename in ['admissions.view_application', 'admissions.record_test_result', 'admissions.make_decision', 'admissions.conduct_interview', 'admissions.evaluate_test', 'admissions.convert_to_enrollment']:
+            perm, _ = Permission.objects.get_or_create(
+                code=codename,
+                defaults={'name': codename.replace('_', ' ').title(), 'module': 'admissions'}
+            )
+            RolePermissionMap.objects.get_or_create(
+                role=admin_role,
+                permission=perm
+            )
+            
+        self.stdout.write("Added Admissions seed data and permissions.")
+        # --- WORKFORCE SEED DATA ---
+        for codename in ['workforce.view_devices', 'workforce.view_attendance', 'workforce.manage_devices']:
+            perm, _ = Permission.objects.get_or_create(
+                code=codename,
+                defaults={'name': codename.replace('_', ' ').title(), 'module': 'workforce'}
+            )
+            RolePermissionMap.objects.get_or_create(
+                role=admin_role,
+                permission=perm
+            )
+        self.stdout.write("Added Workforce permissions to admin.")
+        # --- END WORKFORCE SEED DATA ---
+
         self.stdout.write(self.style.SUCCESS("\nSEED DATA EXTENDED"))
         self.stdout.write(f"AcademicProgram: 1")
         self.stdout.write(f"AcademicCycle: 1")
