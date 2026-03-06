@@ -29,7 +29,7 @@ from django.core.exceptions import ValidationError
 from kernel.exceptions import PermissionDeniedException, AuthorizationException
 
 from .services import AcademicQueryService, EnrollmentService, AssessmentService
-from .auth import AuthorizationFacade
+from kernel.facades import AuthorizationFacade
 
 logger = logging.getLogger(__name__)
 

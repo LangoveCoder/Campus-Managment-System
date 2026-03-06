@@ -93,8 +93,8 @@ class WorkforceIngestionService:
         event_time       — datetime of the punch
         Auth enforced internally.
         """
-        from modules.workforce.auth import AuthorizationFacade
-        AuthorizationFacade.require(person_id, campus_id, 'manage_attendance')
+        from kernel.facades import AuthorizationFacade
+        AuthorizationFacade.require(person_id, campus_id, 'workforce.manage_attendance')
 
         device = WorkforceAttendanceDevice.objects.get(id=device_id, campus_id=campus_id)
 

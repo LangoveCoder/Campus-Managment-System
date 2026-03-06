@@ -123,7 +123,7 @@
             {% for app in recent_applications %}
             <li style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 500; color: #1e293b;">{{ app.applicant_full_name }}</span>
+                    <span style="font-weight: 500; color: #1e293b;">{{ app.form_payload.full_name }}</span>
                     <span
                         style="font-size: 12px; padding: 2px 8px; background: #e2e8f0; border-radius: 12px; color: #475569;">{{ app.status }}</span>
                 </div>

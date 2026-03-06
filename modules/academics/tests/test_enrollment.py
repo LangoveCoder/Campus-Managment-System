@@ -16,7 +16,7 @@ from modules.academics.models import (
     StudentProfile, Enrollment
 )
 from modules.academics.services import EnrollmentService
-from modules.academics.auth import AuthorizationFacade
+from kernel.facades import AuthorizationFacade
 from django.core.exceptions import PermissionDenied
 
 class EnrollmentTest(TestCase):

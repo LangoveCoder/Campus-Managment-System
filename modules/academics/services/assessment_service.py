@@ -8,7 +8,7 @@ from typing import List, Optional
 from decimal import Decimal
 from datetime import date
 from django.utils import timezone
-from ..auth import AuthorizationFacade
+from kernel.facades import AuthorizationFacade
 from ..models import (
     AssessmentInstance, AssessmentResult, Enrollment, 
     ClassGroup, AssessmentPeriod, CourseOffering

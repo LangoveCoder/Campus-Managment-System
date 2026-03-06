@@ -9,7 +9,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.db import transaction
 from django.utils import timezone
-from ..auth import AuthorizationFacade
+from kernel.facades import AuthorizationFacade
 from ..models import Enrollment, StudentProfile, ClassGroup
 
 class EnrollmentService:

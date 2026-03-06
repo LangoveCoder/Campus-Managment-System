@@ -1,6 +1,6 @@
 
 from modules.workforce.models import WorkforceAttendanceEvent, WorkforceDailyAttendance
-from modules.workforce.auth import AuthorizationFacade
+from kernel.facades import AuthorizationFacade
 
 class WorkforceAttendanceQueryService:
     @staticmethod
@@ -8,7 +8,7 @@ class WorkforceAttendanceQueryService:
         """
         Get daily attendance for a specific person.
         """
-        AuthorizationFacade.require(person_id, campus_id, 'view_attendance')
+        AuthorizationFacade.require(person_id, campus_id, 'workforce.view_attendance')
         try:
             return WorkforceDailyAttendance.objects.get(campus_id=campus_id, person_id=person_id, date=date)
         except WorkforceDailyAttendance.DoesNotExist:
@@ -19,7 +19,7 @@ class WorkforceAttendanceQueryService:
         """
         Get raw event logs for a person.
         """
-        AuthorizationFacade.require(person_id, campus_id, 'view_attendance')
+        AuthorizationFacade.require(person_id, campus_id, 'workforce.view_attendance')
         return WorkforceAttendanceEvent.objects.filter(campus_id=campus_id, person_id=target_person_id).order_by('-event_time')
 
     @staticmethod
@@ -35,7 +35,7 @@ class WorkforceAttendanceQueryService:
         Optionally filter to a specific target_person_id.
         Auth enforced internally.
         """
-        AuthorizationFacade.require(person_id, campus_id, 'view_attendance')
+        AuthorizationFacade.require(person_id, campus_id, 'workforce.view_attendance')
 
         filters = dict(
             campus_id=campus_id,
@@ -61,7 +61,7 @@ class WorkforceAttendanceQueryService:
         """
         from django.db.models import Count, Q
 
-        AuthorizationFacade.require(person_id, campus_id, 'view_attendance')
+        AuthorizationFacade.require(person_id, campus_id, 'workforce.view_attendance')
 
         filters = dict(
             campus_id=campus_id,

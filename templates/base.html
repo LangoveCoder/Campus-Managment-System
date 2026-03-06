@@ -183,6 +183,10 @@
       <a href="/workforce/" {% if active_section == 'workforce' %} class="active" {% endif %}>
         Workforce
       </a>
+      {# RULE: always use spaces around == in Django template tags #}
+      <a href="/timetable/" {% if active_section == 'timetable' %} class="active" {% endif %}>
+        Timetable
+      </a>
     </nav>
 
     <style>

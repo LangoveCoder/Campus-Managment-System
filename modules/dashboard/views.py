@@ -23,7 +23,7 @@ from kernel.exceptions import PermissionDeniedException, AuthorizationException
 from modules.academics.services import AcademicQueryService, AssessmentService
 from modules.attendance.services import AttendanceQueryService
 
-from .auth import AuthorizationFacade
+from kernel.facades import AuthorizationFacade
 
 
 # ---------------------------------------------------------------------------

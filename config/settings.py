@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "modules.attendance",
     "modules.workforce",
     "modules.dashboard",
+    "modules.timetable",
 ]
 
 MIDDLEWARE = [

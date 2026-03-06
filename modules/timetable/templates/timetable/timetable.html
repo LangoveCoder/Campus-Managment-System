@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .timetable-grid td,
+    .timetable-grid th {
+        min-width: 110px;
+        vertical-align: middle;
+    }
+
+    .slot-card {
+        background: #f0f7ff;
+        border-left: 3px solid #3b82f6;
+        border-radius: 6px;
+        padding: 6px 8px;
+        font-size: 13px;
+        text-align: left;
+    }
+
+    .slot-card .course {
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .slot-card .meta {
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .empty-cell {
+        color: #cbd5e1;
+        font-size: 20px;
+        text-align: center;
+    }
+
+    .period-label {
+        background: #f8fafc;
+        color: #64748b;
+        font-weight: 700;
+        text-align: center;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Timetable</h1>
+        {% if selected_group %}<p class="text-muted mb-0">{{ selected_group.name }}</p>{% endif %}
+    </div>
+    <div class="d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-outline-secondary">🖨 Print</button>
+        {% if can_manage %}
+        <a href="/timetable/rooms/" class="btn btn-outline-primary">Manage Rooms</a>
+        {% endif %}
+        {% if can_manage and selected_id %}
+        <a href="/timetable/add/?class_group_id={{ selected_id }}" class="btn btn-primary">
+            + Add Slot
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Class Group Selector -->
+<div class="mb-4">
+    <form method="get" action="/timetable/" class="d-flex align-items-center gap-3">
+        <label class="fw-semibold text-muted small text-uppercase">Class Group</label>
+        <select name="class_group_id" class="form-select form-select-sm" style="width:auto;"
+            onchange="this.form.submit()">
+            {% for cg in class_groups %}
+            <option value="{{ cg.id }}" {% if cg.id|stringformat:"s" == selected_id %}selected{% endif %}>
+                {{ cg.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+{% if selected_group and rows %}
+<div class="table-responsive">
+    <table class="table table-bordered timetable-grid align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th class="text-center" style="width:70px;">Period</th>
+                {% for day_code, day_label in days %}
+                <th class="text-center">{{ day_label }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td class="period-label">P{{ row.period }}</td>
+                {% for cell in row.cells %}
+                <td class="text-center p-2">
+                    {% if cell.slot %}
+                    <div class="slot-card">
+                        <div class="course">{{ cell.slot.course_name }}</div>
+                        {% if cell.slot.teacher_name %}
+                        <div class="meta">{{ cell.slot.teacher_name }}</div>
+                        {% endif %}
+                        {% if cell.slot.room_fk %}
+                        <div class="meta">{{ cell.slot.room_fk.name }}</div>
+                        {% elif cell.slot.room %}
+                        <div class="meta">{{ cell.slot.room }}</div>
+                        {% endif %}
+                        {% if can_manage %}
+                        <form method="post" action="/timetable/delete/{{ cell.slot.id }}/" class="mt-1">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-1"
+                                onclick="return confirm('Delete this slot?');" style="font-size:11px;">
+                                ✕ Remove
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <span class="empty-cell">·</span>
+                    {% endif %}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% elif selected_group %}
+<div class="alert alert-light border text-center py-5">
+    <p class="mb-2 text-muted">No timetable slots added yet for <strong>{{ selected_group.name }}</strong>.</p>
+    {% if can_manage %}
+    <a href="/timetable/add/?class_group_id={{ selected_id }}" class="btn btn-primary">
+        + Add First Slot
+    </a>
+    {% endif %}
+</div>
+
+{% else %}
+<p class="text-muted">Select a class group above to view the timetable.</p>
+{% endif %}
+
+<style>
+    @media print {
+
+        .sidebar,
+        nav,
+        .btn,
+        form,
+        select {
+            display: none !important;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        .table {
+            border-color: #000 !important;
+        }
+
+        .slot-card {
+            border: 1px solid #ccc !important;
+            padding: 4px;
+        }
+    }
+</style>
+
+{% endblock %}

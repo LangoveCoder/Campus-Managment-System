@@ -10,7 +10,7 @@ from ..models import (
     InterviewEvaluation, 
     AdmissionDecision
 )
-from ..auth import AuthorizationFacade
+from kernel.facades import AuthorizationFacade
 
 class AdmissionsService:
     """
@@ -70,7 +70,7 @@ class AdmissionsService:
         application = AdmissionApplication.objects.get(id=application_id)
         
         # Authorization Check
-        AuthorizationFacade.require(person_id, application.campus_id, 'evaluate_test')
+        AuthorizationFacade.require(person_id, application.campus_id, 'admissions.evaluate_test')
 
         result = AdmissionTestResult.objects.create(
             campus_id=application.campus_id,
@@ -102,7 +102,7 @@ class AdmissionsService:
         application = AdmissionApplication.objects.get(id=application_id)
         
         # Authorization Check
-        AuthorizationFacade.require(person_id, application.campus_id, 'conduct_interview')
+        AuthorizationFacade.require(person_id, application.campus_id, 'admissions.conduct_interview')
 
         interviewer = Person.objects.get(id=person_id)
 
@@ -134,7 +134,7 @@ class AdmissionsService:
         application = AdmissionApplication.objects.get(id=application_id)
         
         # Authorization Check
-        AuthorizationFacade.require(person_id, application.campus_id, 'make_decision')
+        AuthorizationFacade.require(person_id, application.campus_id, 'admissions.make_decision')
 
         decider = Person.objects.get(id=person_id)
 
@@ -170,7 +170,7 @@ class AdmissionsService:
         application = AdmissionApplication.objects.get(id=application_id)
         
         # Authorization Check
-        AuthorizationFacade.require(person_id, application.campus_id, 'convert_to_enrollment')
+        AuthorizationFacade.require(person_id, application.campus_id, 'admissions.convert_to_enrollment')
 
         if application.status != AdmissionApplication.Status.ACCEPTED:
             raise ValidationError("Application must be ACCEPTED before enrollment.")

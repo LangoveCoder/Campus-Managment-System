@@ -9,7 +9,7 @@ from django.db.models import Q
 from django.utils import timezone
 from kernel.exceptions import AuthorizationException
 from django.db.models import QuerySet
-from ..auth import AuthorizationFacade
+from kernel.facades import AuthorizationFacade
 from ..models import (
     StudentProfile, ClassGroup, Course, Enrollment, 
     TeachingAssignment, AcademicProgram, AcademicCycle
@@ -140,3 +140,33 @@ class AcademicQueryService:
             is_active=True,
         )
 
+    @staticmethod
+    def get_class_groups(campus_id) -> 'QuerySet':
+        """
+        Returns all active ClassGroups for a campus, ordered by name.
+        Auth is the caller's responsibility.
+        """
+        return ClassGroup.objects.filter(
+            campus_id=campus_id,
+            is_active=True,
+        ).order_by('name')
+
+    @staticmethod
+    def get_class_group_by_id(class_group_id, campus_id):
+        from modules.academics.models import ClassGroup
+        try:
+            return ClassGroup.objects.get(id=class_group_id, campus_id=campus_id)
+        except ClassGroup.DoesNotExist:
+            return None
+
+    @staticmethod
+    def get_enrollment_by_id(enrollment_id, campus_id):
+        from modules.academics.models import Enrollment
+        try:
+            return (
+                Enrollment.objects
+                .select_related('student_profile__person', 'class_group')
+                .get(id=enrollment_id, campus_id=campus_id)
+            )
+        except Enrollment.DoesNotExist:
+            return None

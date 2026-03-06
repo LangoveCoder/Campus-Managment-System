@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
-from .auth import AuthorizationFacade
+from kernel.facades import AuthorizationFacade
 from .services.academic_query_service import AcademicQueryService
 from .services.enrollment_service import EnrollmentService
 from .services.assessment_service import AssessmentService

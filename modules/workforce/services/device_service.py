@@ -1,7 +1,7 @@
 import hashlib
 from modules.workforce.models import WorkforceAttendanceDevice
 from kernel.exceptions import PermissionDeniedException as PermissionDenied, BusinessRuleViolation
-from modules.workforce.auth import AuthorizationFacade
+from kernel.facades import AuthorizationFacade
 
 class DeviceRegistrationService:
     @staticmethod
@@ -10,7 +10,7 @@ class DeviceRegistrationService:
         Registers a new biometric device and returns (device, plain_text_token).
         The token is shown ONCE and then hashed.
         """
-        AuthorizationFacade.require(person_id, campus_id, 'manage_devices')
+        AuthorizationFacade.require(person_id, campus_id, 'workforce.manage_devices')
         
         # Generate API Token
         plain_token = secrets.token_urlsafe(32)
@@ -37,7 +37,7 @@ class DeviceRegistrationService:
 
     @staticmethod
     def rotate_token(person_id: int, campus_id: int, device_id: int) -> str:
-        AuthorizationFacade.require(person_id, campus_id, 'manage_devices')
+        AuthorizationFacade.require(person_id, campus_id, 'workforce.manage_devices')
         device = WorkforceAttendanceDevice.objects.get(id=device_id, campus_id=campus_id)
         
         plain_token = secrets.token_urlsafe(32)

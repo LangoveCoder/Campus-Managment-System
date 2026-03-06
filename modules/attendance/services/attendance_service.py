@@ -2,7 +2,7 @@
 from django.db import transaction, IntegrityError
 from kernel.exceptions import BusinessRuleViolation
 from modules.attendance.models import AttendanceSession, AttendanceRecord
-from modules.attendance.auth import AuthorizationFacade
+from kernel.facades import AuthorizationFacade
 
 class AttendanceSessionService:
     @staticmethod
@@ -10,7 +10,7 @@ class AttendanceSessionService:
         """
         Creates a new attendance session.
         """
-        AuthorizationFacade.require(person_id, campus_id, 'create_session')
+        AuthorizationFacade.require(person_id, campus_id, 'attendance.create_session')
         
         # Determine taken_by person (the user creating the session)
         # Note: In a real app, we might want to validate if this person is a teacher for this class,
@@ -39,7 +39,7 @@ class AttendanceMarkingService:
         trusts the pre-validated list and enforces only campus isolation and
         the ledger's uniqueness constraint.
         """
-        AuthorizationFacade.require(person_id, campus_id, 'mark_attendance')
+        AuthorizationFacade.require(person_id, campus_id, 'attendance.mark_attendance')
 
         session = AttendanceSession.objects.select_related('class_group').get(id=session_id)
 
@@ -67,7 +67,7 @@ class AttendanceMarkingService:
 class AttendanceQueryService:
     @staticmethod
     def get_session_report(person_id: int, campus_id: int, session_id: int):
-        AuthorizationFacade.require(person_id, campus_id, 'view_attendance')
+        AuthorizationFacade.require(person_id, campus_id, 'attendance.view_attendance')
         session = AttendanceSession.objects.prefetch_related('records').get(id=session_id)
         if session.campus_id != campus_id:
              raise BusinessRuleViolation("Access denied to session.")
@@ -87,7 +87,7 @@ class AttendanceQueryService:
 
         Authorization is enforced internally — callers must supply a valid person_id.
         """
-        AuthorizationFacade.require(person_id, campus_id, 'view_attendance')
+        AuthorizationFacade.require(person_id, campus_id, 'attendance.view_attendance')
 
         sessions = AttendanceSession.objects.filter(
             campus_id=campus_id,
@@ -109,7 +109,7 @@ class AttendanceQueryService:
     @staticmethod
     def get_sessions_for_class(person_id: int, campus_id: int, class_group_id: int):
         from django.db.models import Count, Q
-        AuthorizationFacade.require(person_id, campus_id, 'view_attendance')
+        AuthorizationFacade.require(person_id, campus_id, 'attendance.view_attendance')
         return AttendanceSession.objects.filter(
             campus_id=campus_id,
             class_group_id=class_group_id
@@ -120,7 +120,7 @@ class AttendanceQueryService:
 
     @staticmethod
     def get_student_attendance_history(person_id: int, campus_id: int, enrollment_id: int) -> dict:
-        AuthorizationFacade.require(person_id, campus_id, 'view_attendance')
+        AuthorizationFacade.require(person_id, campus_id, 'attendance.view_attendance')
 
         records = AttendanceRecord.objects.filter(
             campus_id=campus_id,
@@ -148,3 +148,10 @@ class AttendanceQueryService:
             'records': records,
             'summary': summary
         }
+
+    @staticmethod
+    def get_recent_sessions(person_id: int, campus_id: int, limit: int = 5):
+        AuthorizationFacade.require(person_id, campus_id, 'attendance.view_attendance')
+        return AttendanceSession.objects.filter(
+            campus_id=campus_id
+        ).select_related('class_group').order_by('-attendance_date')[:limit]

@@ -38,7 +38,7 @@ from kernel.exceptions import PermissionDeniedException, AuthorizationException,
 from .services.device_service import DeviceRegistrationService
 from .services.ingestion_service import BiometricIngestionService, WorkforceIngestionService
 from .services.query_service import WorkforceAttendanceQueryService
-from .auth import AuthorizationFacade
+from kernel.facades import AuthorizationFacade
 
 logger = logging.getLogger(__name__)
 
@@ -199,7 +199,7 @@ class DeviceListView(View):
         if not campus_id:
             return _no_campus()
         try:
-            AuthorizationFacade.require(person_id, campus_id, 'manage_devices')
+            AuthorizationFacade.require(person_id, campus_id, 'workforce.manage_devices')
             devices = DeviceRegistrationService.get_devices(
                 campus_id=campus_id,
                 person_id=person_id,

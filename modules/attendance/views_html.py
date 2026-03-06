@@ -13,14 +13,13 @@ def _get_person_id(request):
     person = getattr(request.user, 'person', None)
     return str(person.id) if person else None
 
-from modules.attendance.auth import AuthorizationFacade
+from kernel.facades import AuthorizationFacade
 from modules.attendance.services.attendance_service import (
     AttendanceSessionService, 
     AttendanceMarkingService, 
     AttendanceQueryService
 )
 from modules.academics.services.academic_query_service import AcademicQueryService
-from modules.academics.models import ClassGroup
 
 @login_required
 def attendance_home(request):
@@ -28,7 +27,7 @@ def attendance_home(request):
     if not campus_id:
         return redirect('select_campus')
 
-    AuthorizationFacade.require(_get_person_id(request), campus_id, 'view_attendance')
+    AuthorizationFacade.require(_get_person_id(request), campus_id, 'attendance.view_attendance')
 
     # Gather class groups via academic query service to avoid direct ORM when possible
     programs = AcademicQueryService.get_programs(campus_id)
@@ -52,10 +51,13 @@ def mark_attendance(request, class_group_id):
         return redirect('select_campus')
 
     # Verify class group exists in this campus (we do allow get_object_or_404 for basic scoping)
-    class_group = get_object_or_404(ClassGroup, id=class_group_id, campus_id=campus_id)
+    class_group = AcademicQueryService.get_class_group_by_id(class_group_id, campus_id)
+    if class_group is None:
+        from django.http import Http404
+        raise Http404
 
     if request.method == 'POST':
-        AuthorizationFacade.require(_get_person_id(request), campus_id, 'mark_attendance')
+        AuthorizationFacade.require(_get_person_id(request), campus_id, 'attendance.mark_attendance')
         
         attendance_date = request.POST.get('attendance_date')
         if not attendance_date:
@@ -100,7 +102,7 @@ def mark_attendance(request, class_group_id):
             })
 
     # GET Request
-    AuthorizationFacade.require(_get_person_id(request), campus_id, 'view_attendance')
+    AuthorizationFacade.require(_get_person_id(request), campus_id, 'attendance.view_attendance')
     students = AcademicQueryService.get_students_in_class(_get_person_id(request), class_group_id, campus_id)
     
     return render(request, 'attendance/mark.html', {
@@ -116,8 +118,11 @@ def attendance_summary(request, class_group_id):
     if not campus_id:
         return redirect('select_campus')
 
-    AuthorizationFacade.require(_get_person_id(request), campus_id, 'view_attendance')
-    class_group = get_object_or_404(ClassGroup, id=class_group_id, campus_id=campus_id)
+    AuthorizationFacade.require(_get_person_id(request), campus_id, 'attendance.view_attendance')
+    class_group = AcademicQueryService.get_class_group_by_id(class_group_id, campus_id)
+    if class_group is None:
+        from django.http import Http404
+        raise Http404
 
     date_from_str = request.GET.get('date_from')
     date_to_str = request.GET.get('date_to')
@@ -154,7 +159,10 @@ def session_list(request, class_group_id):
     if not campus_id:
         return redirect('select_campus')
 
-    class_group = get_object_or_404(ClassGroup, id=class_group_id, campus_id=campus_id)
+    class_group = AcademicQueryService.get_class_group_by_id(class_group_id, campus_id)
+    if class_group is None:
+        from django.http import Http404
+        raise Http404
     sessions = AttendanceQueryService.get_sessions_for_class(_get_person_id(request), campus_id, class_group_id)
 
     return render(request, 'attendance/sessions_list.html', {
@@ -163,7 +171,6 @@ def session_list(request, class_group_id):
         'active_section': 'attendance'
     })
 
-from modules.academics.models import Enrollment
 
 @login_required
 def student_history(request, enrollment_id):
@@ -171,7 +178,10 @@ def student_history(request, enrollment_id):
     if not campus_id:
         return redirect('select_campus')
 
-    enrollment = get_object_or_404(Enrollment.objects.select_related('student_profile__person', 'class_group'), id=enrollment_id, campus_id=campus_id)
+    enrollment = AcademicQueryService.get_enrollment_by_id(enrollment_id, campus_id)
+    if enrollment is None:
+        from django.http import Http404
+        raise Http404
     history_data = AttendanceQueryService.get_student_attendance_history(_get_person_id(request), campus_id, enrollment_id)
 
     return render(request, 'attendance/student_history.html', {
