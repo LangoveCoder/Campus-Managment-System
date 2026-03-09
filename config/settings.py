@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     "modules.workforce",
     "modules.dashboard",
     "modules.timetable",
+    "django_celery_beat",
+    "django_celery_results",
 ]
 
 MIDDLEWARE = [
@@ -155,3 +157,15 @@ AUTH_USER_MODEL = "kernel.UserAccount"
 # Login/Logout URLs
 LOGIN_REDIRECT_URL = "kernel:select_campus"
 LOGOUT_REDIRECT_URL = "login"
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Karachi'
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+from config.beat_schedule import CELERY_BEAT_SCHEDULE
