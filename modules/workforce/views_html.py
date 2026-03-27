@@ -102,11 +102,16 @@ def workforce_attendance(request):
         r['full_name'] = persons_map.get(str(r['person_id']), 'Unknown Staff')
         enriched_results.append(r)
 
+    from modules.campus_identity.models import CampusPerson
+    campus_persons = CampusPerson.objects.filter(campus_id=campus_id)
+    identifier_map = {str(cp.person_id): cp.campus_identifier for cp in campus_persons}
+
     context = {
         'start_date': start_date.strftime('%Y-%m-%d'),
         'end_date': end_date.strftime('%Y-%m-%d'),
         'results': enriched_results,
-        'active_section': 'workforce'
+        'active_section': 'workforce',
+        'identifier_map': identifier_map,
     }
     return render(request, 'workforce/attendance.html', context)
 

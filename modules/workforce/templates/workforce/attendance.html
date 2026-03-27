@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load dict_tags %}
 
 {% block title %}Workforce Attendance Summary{% endblock %}
 {% block page_title %}Attendance Summary{% endblock %}
@@ -134,7 +135,12 @@
     <tbody>
         {% for row in results %}
         <tr>
-            <td style="font-weight:500;">{{ row.full_name }}</td>
+            <td style="font-weight:500;">
+                {{ row.full_name }}
+                {% if identifier_map and identifier_map|get_item:row.person_id %}
+                <span class="text-muted small ms-1" style="font-size: 0.8em; color: #64748b;">· {{ identifier_map|get_item:row.person_id }}</span>
+                {% endif %}
+            </td>
             <td>{{ row.total_in }}</td>
             <td>{{ row.total_out }}</td>
             <td>

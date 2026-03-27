@@ -93,23 +93,34 @@ def mark_attendance(request, class_group_id):
         except Exception as e:
             error_message = str(e)
             students = AcademicQueryService.get_students_in_class(_get_person_id(request), class_group_id, campus_id)
+            
+            from modules.campus_identity.models import CampusPerson
+            campus_persons = CampusPerson.objects.filter(campus_id=campus_id)
+            identifier_map = {str(cp.person_id): cp.campus_identifier for cp in campus_persons}
+            
             return render(request, 'attendance/mark.html', {
                 'class_group': class_group,
                 'students': students,
                 'today': timezone.now().date().isoformat(),
                 'active_section': 'attendance',
-                'error_message': error_message
+                'error_message': error_message,
+                'identifier_map': identifier_map,
             })
 
     # GET Request
     AuthorizationFacade.require(_get_person_id(request), campus_id, 'attendance.view_attendance')
     students = AcademicQueryService.get_students_in_class(_get_person_id(request), class_group_id, campus_id)
     
+    from modules.campus_identity.models import CampusPerson
+    campus_persons = CampusPerson.objects.filter(campus_id=campus_id)
+    identifier_map = {str(cp.person_id): cp.campus_identifier for cp in campus_persons}
+
     return render(request, 'attendance/mark.html', {
         'class_group': class_group,
         'students': students,
         'today': timezone.now().date().isoformat(),
-        'active_section': 'attendance'
+        'active_section': 'attendance',
+        'identifier_map': identifier_map,
     })
 
 @login_required

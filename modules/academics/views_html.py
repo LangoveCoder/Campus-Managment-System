@@ -94,13 +94,18 @@ def class_detail(request: HttpRequest, class_group_id: int) -> HttpResponse:
         campus_id=campus_id
     )
     
+    from modules.campus_identity.models import CampusPerson
+    campus_persons = CampusPerson.objects.filter(campus_id=campus_id)
+    identifier_map = {str(cp.person_id): cp.campus_identifier for cp in campus_persons}
+
     return render(request, 'class_detail.html', {
         'class_group': class_group,
         'program_name': class_group.academic_cycle.academic_program.name,
         'students': students,
         'teachers': teachers,
         'courses': courses,
-        'active_section': 'academics'
+        'active_section': 'academics',
+        'identifier_map': identifier_map,
     })
 
 @login_required

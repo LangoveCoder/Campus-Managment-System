@@ -64,8 +64,7 @@
                 <select name="room_fk_id" class="form-select">
                     <option value="">— None —</option>
                     {% for room in rooms %}
-                    <option value="{{ room.id }}">{{ room.name }} ({{ room.get_room_type_display }}, cap. {{
-                        room.capacity }})</option>
+                    <option value="{{ room.id }}">{{ room.name }} ({{ room.get_room_type_display }}, cap. {{ room.capacity }})</option>
                     {% endfor %}
                 </select>
             </div>

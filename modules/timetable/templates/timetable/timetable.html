@@ -2,72 +2,195 @@
 {% block content %}
 
 <style>
-    .timetable-grid td,
-    .timetable-grid th {
-        min-width: 110px;
-        vertical-align: middle;
+    .tt-cell {
+        min-height: 100px;
+        vertical-align: top;
+        transition: background 0.15s;
+    }
+
+    .tt-cell:hover {
+        background-color: #f8fafc;
     }
 
     .slot-card {
-        background: #f0f7ff;
-        border-left: 3px solid #3b82f6;
-        border-radius: 6px;
-        padding: 6px 8px;
-        font-size: 13px;
-        text-align: left;
+        border-radius: 10px;
+        padding: 10px 12px;
+        border-left-width: 4px;
+        border-left-style: solid;
+        cursor: pointer;
+        height: 100%;
     }
 
-    .slot-card .course {
-        font-weight: 600;
-        color: #1e293b;
+    .slot-card:hover {
+        filter: brightness(0.97);
     }
 
-    .slot-card .meta {
-        color: #64748b;
-        font-size: 12px;
-    }
-
-    .empty-cell {
-        color: #cbd5e1;
-        font-size: 20px;
-        text-align: center;
-    }
-
-    .period-label {
-        background: #f8fafc;
-        color: #64748b;
+    .slot-subject {
+        font-size: .72rem;
         font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        margin-bottom: 4px;
+    }
+
+    .slot-teacher {
+        font-size: .85rem;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .slot-room {
+        font-size: .72rem;
+        color: #6b7280;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .color-indigo {
+        background: #eef2ff;
+        border-color: #6366f1;
+    }
+
+    .color-indigo .slot-subject {
+        color: #4338ca;
+    }
+
+    .color-purple {
+        background: #f5f3ff;
+        border-color: #8b5cf6;
+    }
+
+    .color-purple .slot-subject {
+        color: #7c3aed;
+    }
+
+    .color-blue {
+        background: #eff6ff;
+        border-color: #3b82f6;
+    }
+
+    .color-blue .slot-subject {
+        color: #1d4ed8;
+    }
+
+    .color-emerald {
+        background: #ecfdf5;
+        border-color: #10b981;
+    }
+
+    .color-emerald .slot-subject {
+        color: #065f46;
+    }
+
+    .color-amber {
+        background: #fffbeb;
+        border-color: #f59e0b;
+    }
+
+    .color-amber .slot-subject {
+        color: #92400e;
+    }
+
+    .color-rose {
+        background: #fff1f2;
+        border-color: #f43f5e;
+    }
+
+    .color-rose .slot-subject {
+        color: #be123c;
+    }
+
+    .slot-card:hover .slot-remove {
+        opacity: 1 !important;
+    }
+
+    .tt-period {
+        background: #f9fafb;
+        font-weight: 700;
+        color: #9ca3af;
         text-align: center;
+        vertical-align: middle;
+        border-right: 1px solid #e5e7eb;
+    }
+
+    .tt-header-cell {
+        font-size: .72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .07em;
+        color: #6b7280;
+        background: #f9fafb;
+        padding: 14px 8px;
+        text-align: center;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    @media print {
+
+        aside,
+        nav,
+        .no-print {
+            display: none !important;
+        }
+
+        .shadow-sm {
+            box-shadow: none !important;
+        }
     }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-0">Timetable</h1>
-        {% if selected_group %}<p class="text-muted mb-0">{{ selected_group.name }}</p>{% endif %}
-    </div>
-    <div class="d-flex gap-2">
-        <button onclick="window.print()" class="btn btn-outline-secondary">🖨 Print</button>
-        {% if can_manage %}
-        <a href="/timetable/rooms/" class="btn btn-outline-primary">Manage Rooms</a>
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <h1 class="h4 fw-bold mb-0" style="color:#1e293b;">Timetable</h1>
+        {% if selected_group %}
+        <span class="badge rounded-pill"
+            style="background:#f1f5f9;color:#475569;font-size:.85rem;font-weight:500;padding:6px 14px;">
+            {{ selected_group.name }}
+        </span>
         {% endif %}
-        {% if can_manage and selected_id %}
-        <a href="/timetable/add/?class_group_id={{ selected_id }}" class="btn btn-primary">
-            + Add Slot
+    </div>
+    <div class="d-flex gap-2 no-print">
+        {% if can_manage %}
+        <a href="/timetable/rooms/" class="btn btn-sm d-flex align-items-center gap-2"
+            style="background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;font-weight:500;">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h4m-4 4h4"
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+            </svg>
+            Rooms
+        </a>
+        <a href="/timetable/add/?class_group_id={{ selected_id }}"
+            class="btn btn-sm btn-primary d-flex align-items-center gap-2" style="font-weight:500;">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+            </svg>
+            Add Slot
         </a>
         {% endif %}
+        <button onclick="window.print()" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2"
+            style="font-weight:500;">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+            </svg>
+            Print
+        </button>
     </div>
 </div>
 
 <!-- Class Group Selector -->
-<div class="mb-4">
-    <form method="get" action="/timetable/" class="d-flex align-items-center gap-3">
-        <label class="fw-semibold text-muted small text-uppercase">Class Group</label>
-        <select name="class_group_id" class="form-select form-select-sm" style="width:auto;"
+<div class="mb-4 p-3 rounded-3 no-print" style="background:#f8fafc;border:1px solid #f1f5f9;">
+    <label class="d-block text-uppercase fw-semibold mb-2"
+        style="font-size:.7rem;letter-spacing:.07em;color:#64748b;">Class Group</label>
+    <form method="get" action="/timetable/" class="m-0">
+        <select name="class_group_id" class="form-select form-select-sm" style="max-width:240px;"
             onchange="this.form.submit()">
             {% for cg in class_groups %}
-            <option value="{{ cg.id }}" {% if cg.id|stringformat:"s" == selected_id %}selected{% endif %}>
-                {{ cg.name }}
+            <option value="{{ cg.id }}" {% if cg.id|stringformat:"s" == selected_id %}selected{% endif %}>{{ cg.name }}
             </option>
             {% endfor %}
         </select>
@@ -75,92 +198,81 @@
 </div>
 
 {% if selected_group and rows %}
-<div class="table-responsive">
-    <table class="table table-bordered timetable-grid align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th class="text-center" style="width:70px;">Period</th>
-                {% for day_code, day_label in days %}
-                <th class="text-center">{{ day_label }}</th>
+<!-- Timetable Grid -->
+<div class="rounded-3 overflow-hidden shadow-sm" style="border:1px solid #e5e7eb;">
+    <div class="table-responsive">
+        <table class="table table-bordered mb-0" style="min-width:700px;border-color:#e5e7eb;">
+            <thead>
+                <tr>
+                    <th class="tt-header-cell" style="width:72px;">Period</th>
+                    {% for day_code, day_label in days %}
+                    <th class="tt-header-cell">{{ day_label }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                {% with rmod=forloop.counter0 %}
+                <tr>
+                    <td class="tt-period">P{{ row.period }}</td>
+                    {% for cell in row.cells %}
+                    <td class="p-2 tt-cell" style="border-color:#e5e7eb;">
+                        {% if cell.slot %}
+                        {% with cidx=forloop.parentloop.counter0 %}
+                        {% if cidx == 0 %}<div class="slot-card color-indigo">{% endif %}
+                            {% if cidx == 1 %}<div class="slot-card color-purple">{% endif %}
+                                {% if cidx == 2 %}<div class="slot-card color-blue">{% endif %}
+                                    {% if cidx == 3 %}<div class="slot-card color-emerald">{% endif %}
+                                        {% if cidx == 4 %}<div class="slot-card color-amber">{% endif %}
+                                            {% if cidx == 5 %}<div class="slot-card color-rose">{% endif %}
+                                                {% if cidx > 5 %}<div class="slot-card color-indigo">{% endif %}
+                                                    <div class="slot-subject">{{ cell.slot.course_name }}</div>
+                                                    <div class="slot-teacher">{{ cell.slot.teacher_name }}</div>
+                                                    {% if cell.slot.room_fk or cell.slot.room %}
+                                                    <div class="slot-room">
+                                                        <svg width="11" height="11" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path
+                                                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h4m-4 4h4"
+                                                                stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" />
+                                                        </svg>
+                                                        {% if cell.slot.room_fk %}{{ cell.slot.room_fk.name }}{% else
+                                                        %}{{ cell.slot.room }}{% endif %}
+                                                    </div>
+                                                    {% endif %}
+                                                    {% if can_manage %}
+                                                    <form method="post" action="/timetable/delete/{{ cell.slot.id }}/"
+                                                        class="mt-2 no-print">
+                                                        {% csrf_token %}
+                                                        <button type="submit"
+                                                            class="btn btn-sm btn-link text-danger p-0 slot-remove"
+                                                            style="font-size:.72rem;opacity:0;transition:opacity .15s;"
+                                                            onclick="return confirm('Delete this slot?')">&#x2715;
+                                                            Remove</button>
+                                                    </form>
+                                                    {% endif %}
+                                                </div>
+                                                {% endwith %}
+                                                {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endwith %}
                 {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in rows %}
-            <tr>
-                <td class="period-label">P{{ row.period }}</td>
-                {% for cell in row.cells %}
-                <td class="text-center p-2">
-                    {% if cell.slot %}
-                    <div class="slot-card">
-                        <div class="course">{{ cell.slot.course_name }}</div>
-                        {% if cell.slot.teacher_name %}
-                        <div class="meta">{{ cell.slot.teacher_name }}</div>
-                        {% endif %}
-                        {% if cell.slot.room_fk %}
-                        <div class="meta">{{ cell.slot.room_fk.name }}</div>
-                        {% elif cell.slot.room %}
-                        <div class="meta">{{ cell.slot.room }}</div>
-                        {% endif %}
-                        {% if can_manage %}
-                        <form method="post" action="/timetable/delete/{{ cell.slot.id }}/" class="mt-1">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-1"
-                                onclick="return confirm('Delete this slot?');" style="font-size:11px;">
-                                ✕ Remove
-                            </button>
-                        </form>
-                        {% endif %}
-                    </div>
-                    {% else %}
-                    <span class="empty-cell">·</span>
-                    {% endif %}
-                </td>
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 {% elif selected_group %}
-<div class="alert alert-light border text-center py-5">
-    <p class="mb-2 text-muted">No timetable slots added yet for <strong>{{ selected_group.name }}</strong>.</p>
+<div class="text-center py-5" style="color:#9ca3af;">
+    <div style="font-size:2.5rem;">&#128197;</div>
+    <div class="fw-medium mt-2">No slots added yet</div>
     {% if can_manage %}
-    <a href="/timetable/add/?class_group_id={{ selected_id }}" class="btn btn-primary">
-        + Add First Slot
-    </a>
+    <a href="/timetable/add/?class_group_id={{ selected_id }}" class="btn btn-primary btn-sm mt-3">+ Add First Slot</a>
     {% endif %}
 </div>
-
-{% else %}
-<p class="text-muted">Select a class group above to view the timetable.</p>
 {% endif %}
-
-<style>
-    @media print {
-
-        .sidebar,
-        nav,
-        .btn,
-        form,
-        select {
-            display: none !important;
-        }
-
-        body {
-            margin: 0;
-        }
-
-        .table {
-            border-color: #000 !important;
-        }
-
-        .slot-card {
-            border: 1px solid #ccc !important;
-            padding: 4px;
-        }
-    }
-</style>
 
 {% endblock %}

@@ -57,9 +57,15 @@ def applications_list(request):
         return render(request, 'admissions/list.html', {'error': "A permission error occurred: " + str(e), 'active_section': 'admissions'})
 
     applications = AdmissionsService.get_applications(campus_id, _get_person_id(request))
+    
+    from modules.campus_identity.models import CampusPerson
+    campus_persons = CampusPerson.objects.filter(campus_id=campus_id)
+    identifier_map = {str(cp.person_id): cp.campus_identifier for cp in campus_persons}
+    
     return render(request, 'admissions/list.html', {
         'applications': applications,
-        'active_section': 'admissions'
+        'active_section': 'admissions',
+        'identifier_map': identifier_map,
     })
 
 # Screen 2: Application Detail

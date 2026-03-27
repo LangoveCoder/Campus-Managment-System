@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load dict_tags %}
 
 {% block title %}Class Details — {{ class_group.name }}{% endblock %}
 
@@ -148,7 +149,7 @@
                 <thead>
                     <tr>
                         <th>Student Name</th>
-                        <th>Adm #</th>
+                        <th>ID</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -156,7 +157,11 @@
                     {% for student in students %}
                     <tr>
                         <td>{{ student.person.full_name }}</td>
-                        <td>{{ student.admission_number }}</td>
+                        <td>
+                            {% if identifier_map %}
+                            <span style="font-family: monospace; font-size: 12px; background: #f1f5f9; padding: 2px 7px; border-radius: 4px; color: #334155;">{{ identifier_map|get_item:student.person.id|default:"—" }}</span>
+                            {% else %}—{% endif %}
+                        </td>
                         <td>
                             <div style="display: flex; gap: 12px; align-items: center;">
                                 <span style="color: #10b981;">● Active</span>

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load dict_tags %}
 
 {% block title %}Admissions Dashboard{% endblock %}
 
@@ -114,7 +115,14 @@
     <tbody>
         {% for app in applications %}
         <tr>
-            <td style="font-weight: 500;">{{ app.form_payload.full_name }}</td>
+            <td style="font-weight: 500;">
+                {{ app.form_payload.full_name }}
+                {% if identifier_map and app.applicant and identifier_map|get_item:app.applicant.id %}
+                <span class="text-muted small ms-1" style="font-size: 0.8em; color: #64748b;">· {{ identifier_map|get_item:app.applicant.id }}</span>
+                {% elif identifier_map and app.applicant %}
+                <span class="text-muted small ms-1" style="font-size: 0.8em; color: #64748b;">· —</span>
+                {% endif %}
+            </td>
             <td>{{ app.submitted_at|date:"j M Y, g:i a" }}</td>
             <td>
                 {% if app.status == 'PENDING' %}<span class="badge status-pending">Pending</span>{% endif %}

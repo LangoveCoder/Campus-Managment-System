@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h4 fw-bold mb-0" style="color:#1e293b;">Upload Media</h1>
+        <p class="text-muted small mb-0">Upload a photo, document or file for an entity on this campus.</p>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+{% if success %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ success }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+<div class="card shadow-sm" style="max-width:560px;">
+    <div class="card-body p-4">
+        <form method="post" enctype="multipart/form-data" action="/media-assets/upload/">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Entity Type</label>
+                <select name="entity_type" class="form-select" required>
+                    <option value="">— Select —</option>
+                    <option value="student">Student</option>
+                    <option value="applicant">Applicant</option>
+                    <option value="staff">Staff</option>
+                    <option value="campus">Campus</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Asset Type</label>
+                <select name="asset_type" class="form-select" required>
+                    <option value="">— Select —</option>
+                    <option value="profile_photo">Profile Photo</option>
+                    <option value="document">Document</option>
+                    <option value="logo">Logo</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Entity ID</label>
+                <input type="text" name="entity_id" class="form-control" required
+                    placeholder="UUID or numeric ID of the entity">
+                <div class="form-text">The unique ID of the student, applicant, or staff member.</div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">File</label>
+                <input type="file" name="file" class="form-control" required accept=".jpg,.jpeg,.png,.pdf">
+                <div class="form-text">Accepted: JPEG, PNG, PDF. Maximum size: 5 MB.</div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Upload</button>
+                <a href="/dashboard/" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

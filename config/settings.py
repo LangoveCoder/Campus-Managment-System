@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     "modules.workforce",
     "modules.dashboard",
     "modules.timetable",
+    "modules.media",
+    "modules.campus_identity",
     "django_celery_beat",
     "django_celery_results",
 ]
@@ -141,6 +143,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+# Media files (uploaded assets)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 
 # Default primary key field type

@@ -3,34 +3,27 @@ URL configuration for config project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),  # Authentication URLs
-    path("dashboard/", include("modules.dashboard.urls_html")),  # HTML — no api/ prefix
+    path("dashboard/", include("modules.dashboard.urls_html")),
     path("academics/", include("modules.academics.urls_html")),
     path("attendance/", include("modules.attendance.urls_html")),
     path("admissions/", include("modules.admissions.urls_html")),
     path("workforce/", include("modules.workforce.urls_html")),
     path("timetable/", include("modules.timetable.urls_html")),
+    path("media-assets/", include("modules.media.urls_html")),
     path("", include("kernel.urls")),                        # Kernel UI + API
-    path("api/dashboard/", include("modules.dashboard.urls")),  # Dashboard API
-    path("api/academics/", include("modules.academics.urls")),  # Academics API
-    path("api/admissions/", include("modules.admissions.urls")),  # Admissions API
-    path("api/attendance/", include("modules.attendance.urls")),  # Attendance API
-    path("api/workforce/", include("modules.workforce.urls")),    # Workforce API
-]
+    path("api/dashboard/", include("modules.dashboard.urls")),
+    path("api/academics/", include("modules.academics.urls")),
+    path("api/admissions/", include("modules.admissions.urls")),
+    path("api/attendance/", include("modules.attendance.urls")),
+    path("api/workforce/", include("modules.workforce.urls")),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
