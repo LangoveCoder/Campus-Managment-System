@@ -33,10 +33,13 @@ class AdmissionApplication(BaseCampusModel):
     class Status(models.TextChoices):
         SUBMITTED = 'SUBMITTED', _('Submitted')
         TESTED = 'TESTED', _('Tested')
+        MERIT_LISTED = 'MERIT_LISTED', _('Merit Listed')
         INTERVIEWED = 'INTERVIEWED', _('Interviewed')
+        INTERVIEW_PASSED = 'INTERVIEW_PASSED', _('Interview Passed')
         ACCEPTED = 'ACCEPTED', _('Accepted')
         REJECTED = 'REJECTED', _('Rejected')
         WAITLISTED = 'WAITLISTED', _('Waitlisted')
+        ENROLLED = 'ENROLLED', _('Enrolled')
 
     applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE, related_name='applications')
     
@@ -54,6 +57,19 @@ class AdmissionApplication(BaseCampusModel):
     
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.SUBMITTED)
     submitted_at = models.DateTimeField(auto_now_add=True)
+
+    # Extended applicant details
+    father_name = models.CharField(max_length=100, blank=True)
+    cnic = models.CharField(max_length=15, blank=True)  # CNIC or B-form
+    district = models.CharField(max_length=100, blank=True)
+    marks = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    contact_number = models.CharField(max_length=20, blank=True)
+    address = models.TextField(blank=True)
+
+    # Merit scoring
+    interview_marks = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    merit_score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
         return f"App-{self.id}: {self.applicant.full_name} ({self.status})"
@@ -103,3 +119,23 @@ class AdmissionDecision(BaseCampusModel):
     decided_at = models.DateTimeField(auto_now_add=True)
     
     comments = models.TextField(blank=True)
+
+class AdmissionConfig(models.Model):
+    INTERVIEW_TYPE_CHOICES = [
+        ('QUALIFYING', 'Qualifying Only (Pass/Fail)'),
+        ('SCORED', 'Scored (Marks Based)'),
+    ]
+    campus_id = models.IntegerField()
+    academic_program = models.ForeignKey(
+        'academics.AcademicProgram',
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='admission_configs'
+    )
+    interview_type = models.CharField(max_length=20, choices=INTERVIEW_TYPE_CHOICES, default='QUALIFYING')
+    test_weight = models.DecimalField(max_digits=4, decimal_places=2, default=1.00)
+    interview_weight = models.DecimalField(max_digits=4, decimal_places=2, default=0.00)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [('campus_id', 'academic_program')]

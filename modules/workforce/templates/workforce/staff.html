@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Staff Directory{% endblock %}
+{% block page_title %}Staff Directory{% endblock %}
+
+{% block extra_css %}
+<style>
+.card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.05); margin-bottom: 24px; }
+.btn { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.btn-primary { background: #3b82f6; color: white; }
+.btn-primary:hover { background: #2563eb; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: #f8fafc; padding: 10px 14px; text-align: left; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid #e2e8f0; }
+td { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #f8fafc; }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+.badge-faculty { background: #dbeafe; color: #1d4ed8; }
+.badge-admin { background: #ede9fe; color: #6d28d9; }
+.badge-other { background: #f0fdf4; color: #166534; }
+.form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+.form-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 160px; }
+label { font-size: 13px; font-weight: 500; color: #475569; }
+input, select { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
+.alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; }
+.alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.section-header h3 { margin: 0; font-size: 16px; font-weight: 600; color: #1e293b; }
+.monospace { font-family: monospace; font-size: 13px; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% if success %}<div class="alert-success">✓ {{ success }}</div>{% endif %}
+{% if error %}<div class="alert-error">✗ {{ error }}</div>{% endif %}
+
+<!-- Add Staff Form -->
+<div class="card">
+    <div class="section-header">
+        <h3>Add New Staff Member</h3>
+    </div>
+    <form method="POST" action="{% url 'add_staff' %}">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group">
+                <label for="full_name">Full Name *</label>
+                <input type="text" id="full_name" name="full_name" required placeholder="e.g. Dr. Tariq Mehmood">
+            </div>
+            <div class="form-group">
+                <label for="primary_phone">Phone</label>
+                <input type="text" id="primary_phone" name="primary_phone" placeholder="e.g. 03001234567">
+            </div>
+            <div class="form-group">
+                <label for="primary_email">Email</label>
+                <input type="email" id="primary_email" name="primary_email" placeholder="optional">
+            </div>
+            <div class="form-group">
+                <label for="role_name">Role *</label>
+                <select id="role_name" name="role_name" required>
+                    {% for role in roles %}
+                    <option value="{{ role.name }}">{{ role.get_name_display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="justify-content: flex-end;">
+                <button type="submit" class="btn btn-primary">Add Staff</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Staff List -->
+<div class="card">
+    <div class="section-header">
+        <h3>Staff Directory <span style="color:#94a3b8; font-weight:400;">({{ staff|length }} members)</span></h3>
+    </div>
+    {% if staff %}
+    <table>
+        <thead>
+            <tr>
+                <th>Campus ID</th>
+                <th>Full Name</th>
+                <th>Role</th>
+                <th>Phone</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in staff %}
+            <tr>
+                <td class="monospace">{{ s.campus_id_str }}</td>
+                <td><strong>{{ s.full_name }}</strong></td>
+                <td>
+                    {% if s.role == "Faculty" %}
+                        <span class="badge badge-faculty">{{ s.role }}</span>
+                    {% elif s.role == "Campus Admin" %}
+                        <span class="badge badge-admin">{{ s.role }}</span>
+                    {% else %}
+                        <span class="badge badge-other">{{ s.role }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ s.primary_phone }}</td>
+                <td>{{ s.primary_email }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color:#94a3b8; text-align:center; padding: 32px 0;">No staff members added yet.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

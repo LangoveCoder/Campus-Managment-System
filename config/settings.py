@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "modules.timetable",
     "modules.media",
     "modules.campus_identity",
+    "modules.superadmin",
     "django_celery_beat",
     "django_celery_results",
 ]
@@ -65,6 +66,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "kernel.middleware.SuperAdminRedirectMiddleware",  # Redirect superadmins away from module URLs
     "kernel.middleware.JWTAuthenticationMiddleware",  # JWT — must be before CampusContext
     "kernel.middleware.CampusContextMiddleware",  # Campus context middleware
 ]
@@ -85,6 +87,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "modules.superadmin.context_processors.superadmin_context",
             ],
         },
     },

@@ -4,5 +4,6 @@ from .pipeline import (
     AdmissionApplication, 
     AdmissionTestResult, 
     InterviewEvaluation, 
-    AdmissionDecision
+    AdmissionDecision,
+    AdmissionConfig
 )

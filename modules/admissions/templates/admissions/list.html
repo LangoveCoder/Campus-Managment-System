@@ -1,149 +1,97 @@
 {% extends "base.html" %}
-{% load dict_tags %}
 
 {% block title %}Admissions Dashboard{% endblock %}
-
 {% block page_title %}Admissions Dashboard{% endblock %}
 
 {% block extra_css %}
 <style>
-    .data-table {
-        width: 100%;
-        border-collapse: collapse;
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
-    }
-
-    .data-table th {
-        background: #f8fafc;
-        color: #475569;
-        font-size: 13px;
-        font-weight: 600;
-        text-align: left;
-        padding: 14px 20px;
-        text-transform: uppercase;
-        border-bottom: 2px solid #e2e8f0;
-    }
-
-    .data-table td {
-        padding: 16px 20px;
-        border-bottom: 1px solid #e2e8f0;
-        font-size: 14px;
-        color: #1e293b;
-    }
-
-    .data-table tr:hover {
-        background-color: #f8fafc;
-    }
-
-    .badge {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 9999px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .status-pending {
-        background: #f1f5f9;
-        color: #475569;
-    }
-
-    .status-interviewed {
-        background: #e0f2fe;
-        color: #0284c7;
-    }
-
-    .status-accepted {
-        background: #dcfce7;
-        color: #16a34a;
-    }
-
-    .status-rejected {
-        background: #fee2e2;
-        color: #dc2626;
-    }
-
-    .status-waitlisted {
-        background: #fef08a;
-        color: #a16207;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 48px;
-        background: white;
-        border: 1px dashed #cbd5e1;
-        border-radius: 8px;
-        color: #64748b;
-    }
-
-    .btn-link {
-        color: #3b82f6;
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    .btn-link:hover {
-        text-decoration: underline;
-    }
+    .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .data-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+    .data-table th { background: #f8fafc; color: #475569; font-size: 12px; font-weight: 700; text-align: left; padding: 12px 18px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; }
+    .data-table td { padding: 14px 18px; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #1e293b; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #f8fafc; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; }
+    .s-submitted   { background:#f1f5f9; color:#475569; }
+    .s-tested      { background:#e0f2fe; color:#0284c7; }
+    .s-merit       { background:#fef9c3; color:#a16207; }
+    .s-interviewed { background:#ede9fe; color:#7c3aed; }
+    .s-int-passed  { background:#f0fdf4; color:#16a34a; }
+    .s-accepted    { background:#dcfce7; color:#15803d; }
+    .s-rejected    { background:#fee2e2; color:#dc2626; }
+    .s-waitlisted  { background:#fef08a; color:#92400e; }
+    .btn-link { color: #3b82f6; text-decoration: none; font-weight: 600; font-size: 13px; }
+    .btn-link:hover { text-decoration: underline; }
+    .btn-new { background: #3b82f6; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 600; }
+    .btn-new:hover { background: #2563eb; }
+    .empty-state { text-align: center; padding: 56px; background: white; border: 1px dashed #cbd5e1; border-radius: 8px; color: #64748b; }
+    .name-cell { font-weight: 600; }
+    .sub-text { font-size: 12px; color: #94a3b8; }
 </style>
 {% endblock %}
 
 {% block content %}
 
 {% if error %}
-<div
-    style="background: #fee2e2; color: #991b1b; padding: 16px; border-radius: 6px; margin-bottom: 24px; border: 1px solid #fecaca;">
-    {{ error }}
-</div>
+<div style="background:#fee2e2; color:#991b1b; padding:14px 18px; border-radius:6px; margin-bottom:20px; border:1px solid #fecaca;">{{ error }}</div>
 {% endif %}
+
+<div class="header-bar">
+    <span style="color:#64748b; font-size:14px;">{{ applications|length }} application{{ applications|length|pluralize }} found</span>
+    <div>
+        <a href="{% url 'admission_config' %}" class="btn-new" style="background: #64748b; margin-right: 8px;">⚙️ Config</a>
+        <a href="{% url 'import_merit_list' %}" class="btn-new" style="background: #10b981; margin-right: 8px;">Import Merit List</a>
+        <a href="{% url 'merit_list' %}" class="btn-new" style="background: #8b5cf6; margin-right: 8px;">Rankings</a>
+        <a href="{% url 'apply' %}" class="btn-new">+ New Application</a>
+    </div>
+</div>
 
 {% if applications %}
 <table class="data-table">
     <thead>
         <tr>
-            <th>Applicant Name</th>
-            <th>Submitted Date</th>
+            <th>#</th>
+            <th>Applicant</th>
+            <th>Father's Name</th>
+            <th>CNIC / B-Form</th>
+            <th>Marks</th>
             <th>Status</th>
+            <th>Submitted</th>
             <th>Action</th>
         </tr>
     </thead>
     <tbody>
         {% for app in applications %}
         <tr>
-            <td style="font-weight: 500;">
-                {{ app.form_payload.full_name }}
-                {% if identifier_map and app.applicant and identifier_map|get_item:app.applicant.id %}
-                <span class="text-muted small ms-1" style="font-size: 0.8em; color: #64748b;">· {{ identifier_map|get_item:app.applicant.id }}</span>
-                {% elif identifier_map and app.applicant %}
-                <span class="text-muted small ms-1" style="font-size: 0.8em; color: #64748b;">· —</span>
-                {% endif %}
-            </td>
-            <td>{{ app.submitted_at|date:"j M Y, g:i a" }}</td>
+            <td style="color:#94a3b8; font-size:13px;">{{ app.id }}</td>
             <td>
-                {% if app.status == 'PENDING' %}<span class="badge status-pending">Pending</span>{% endif %}
-                {% if app.status == 'INTERVIEWED' %}<span class="badge status-interviewed">Interviewed</span>{% endif %}
-                {% if app.status == 'TESTED' %}<span class="badge status-interviewed">Tested</span>{% endif %}
-                {% if app.status == 'ACCEPTED' %}<span class="badge status-accepted">Accepted</span>{% endif %}
-                {% if app.status == 'REJECTED' %}<span class="badge status-rejected">Rejected</span>{% endif %}
-                {% if app.status == 'WAITLISTED' %}<span class="badge status-waitlisted">Waitlisted</span>{% endif %}
-                {% if app.status == 'SUBMITTED' %}<span class="badge status-pending">Submitted</span>{% endif %}
-                {% if app.status == 'ENROLLED' %}<span class="badge status-accepted">Enrolled</span>{% endif %}
+                <div class="name-cell">{{ app.applicant.full_name }}</div>
+                {% if app.district %}<div class="sub-text">{{ app.district }}</div>{% endif %}
             </td>
+            <td>{{ app.father_name|default:"—" }}</td>
+            <td style="font-family:monospace; font-size:13px;">{{ app.formatted_cnic|default:"—" }}</td>
+            <td>{{ app.marks|default:"—" }}</td>
             <td>
-                <a href="{% url 'application_detail' app.id %}" class="btn-link">View Detail →</a>
+                {% if app.status == 'SUBMITTED' %}<span class="badge s-submitted">Submitted</span>
+                {% elif app.status == 'TESTED' %}<span class="badge s-tested">Tested</span>
+                {% elif app.status == 'MERIT_LISTED' %}<span class="badge s-merit">Merit Listed</span>
+                {% elif app.status == 'INTERVIEWED' %}<span class="badge s-interviewed">Interviewed</span>
+                {% elif app.status == 'INTERVIEW_PASSED' %}<span class="badge s-int-passed">Interview Passed</span>
+                {% elif app.status == 'ACCEPTED' %}<span class="badge s-accepted">Accepted</span>
+                {% elif app.status == 'REJECTED' %}<span class="badge s-rejected">Rejected</span>
+                {% elif app.status == 'WAITLISTED' %}<span class="badge s-waitlisted">Waitlisted</span>
+                {% else %}<span class="badge s-submitted">{{ app.status }}</span>{% endif %}
             </td>
+            <td style="font-size:13px; color:#64748b;">{{ app.submitted_at|date:"j M Y" }}</td>
+            <td><a href="{% url 'application_detail' app.id %}" class="btn-link">View →</a></td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% else %}
 <div class="empty-state">
-    <p>No admission applications found for this campus.</p>
+    <p style="margin:0 0 12px; font-size:15px;">No admission applications found for this campus.</p>
+    <a href="{% url 'apply' %}" class="btn-new">+ Submit First Application</a>
 </div>
 {% endif %}
 

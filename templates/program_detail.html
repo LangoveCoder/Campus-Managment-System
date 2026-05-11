@@ -94,13 +94,16 @@
 {% endblock %}
 
 {% block content %}
-<nav class="breadcrumb">
-    <a href="/dashboard/">Dashboard</a>
-    <span class="separator"></span>
-    <a href="{% url 'program_list' %}">Academics</a>
-    <span class="separator"></span>
-    <span>{{ program.name }}</span>
-</nav>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <nav class="breadcrumb" style="margin-bottom: 0;">
+        <a href="/dashboard/">Dashboard</a>
+        <span class="separator"></span>
+        <a href="{% url 'program_list' %}">Academics</a>
+        <span class="separator"></span>
+        <span>{{ program.name }}</span>
+    </nav>
+    <a href="{% url 'create_cycle' program.id %}" class="btn btn-primary" style="padding: 8px 16px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; font-weight: 500;">+ New Cycle</a>
+</div>
 
 {% if cycle_data %}
 {% for item in cycle_data %}
@@ -108,12 +111,14 @@
     <div class="cycle-header">
         <h2 class="cycle-title">{{ item.cycle.name }}</h2>
         <div class="cycle-meta">
-            Sequence: {{ item.cycle.sequence }} |
+            <span style="margin-right: 12px;">Sequence: {{ item.cycle.sequence }} |
             {% if item.cycle.is_active %}
             <span style="color: #10b981;">Active</span>
             {% else %}
             <span style="color: #64748b;">Inactive</span>
             {% endif %}
+            </span>
+            <a href="{% url 'create_class_group' program.id item.cycle.id %}" style="padding: 4px 12px; background: #f1f5f9; color: #3b82f6; text-decoration: none; border-radius: 4px; border: 1px solid #cbd5e1; font-weight: 500; font-size: 13px;">+ New Class Group</a>
         </div>
     </div>
 

@@ -137,3 +137,13 @@
 **Key Results:**
 - 10 Students, 3 Class Groups, and 2 Staff verified on the dashboard.
 
+---
+
+## Phase 18: Academics UI & Program Management Workflow
+**Goal:** Provide full administrative control over academic structure from the browser user interface.
+**Outcome:** Built intuitive UI for configuring programs, cycles, and class groups, including correct resolution of global configuration dependencies.
+**Key Features:**
+- **UI Creation Flow:** Dedicated templates injected (`create_program.html`, `create_cycle.html`, `create_class_group.html`).
+- **Global Context Resolution:** Corrected `AssessmentScheme` retrieval via `.all_campuses()` bypass to handle `CampusAwareManager` isolation bounds gracefully within standard views.
+- **Fail-safes:** Added robust validation in `get_campus_context` avoiding 500 crashes on rogue/null contexts.
+

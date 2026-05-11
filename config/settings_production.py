@@ -1,0 +1,16 @@
+from .settings import *
+
+DEBUG = False
+SECRET_KEY = 'REPLACE_WITH_REAL_SECRET_KEY'
+ALLOWED_HOSTS = ['REPLACE_WITH_DOMAIN_OR_IP']
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = True
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+# Use environment variables for secrets in production
+# import os
+# SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
+# DATABASES['default']['PASSWORD'] = os.environ['DB_PASSWORD']

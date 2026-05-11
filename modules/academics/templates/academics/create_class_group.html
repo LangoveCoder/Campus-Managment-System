@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Create Class Group - Academics{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-left">
+        <a href="{% url 'program_detail' program.id %}" class="back-link">← Back to {{ program.name }}</a>
+        <h1>Create New Class Group</h1>
+        <p class="subtitle">For Cycle: {{ cycle.name }}</p>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert error">
+    {{ error }}
+</div>
+{% endif %}
+
+<div class="card">
+    <form method="POST" action="{% url 'create_class_group' program.id cycle.id %}" class="details-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="name">Class Name*</label>
+            <input type="text" id="name" name="name" required placeholder="e.g. CS101-A">
+        </div>
+        <div class="form-group">
+            <label for="capacity">Capacity*</label>
+            <input type="number" id="capacity" name="capacity" required min="1" max="1000" value="30">
+        </div>
+        <div class="form-actions">
+            <a href="{% url 'program_detail' program.id %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Create Class Group</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

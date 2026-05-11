@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Import Merit List{% endblock %}
+{% block page_title %}Import Merit List{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
+    .form-group { margin-bottom: 20px; }
+    label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #475569; }
+    .btn { background: #3b82f6; color: white; padding: 10px 16px; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .btn:hover { background: #2563eb; }
+    .alert { padding: 16px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; }
+    .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .breadcrumb { display: flex; gap: 8px; margin-bottom: 24px; font-size: 14px; color: #64748b; }
+    .breadcrumb a { color: #3b82f6; text-decoration: none; }
+    .breadcrumb .separator::after { content: "→"; margin-left: 8px; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="breadcrumb">
+    <a href="/dashboard/">Dashboard</a>
+    <span class="separator"></span>
+    <a href="{% url 'applications_list' %}">Admissions</a>
+    <span class="separator"></span>
+    <span>Import Merit List</span>
+</nav>
+
+{% if error %}
+<div class="alert alert-error">{{ error }}</div>
+{% endif %}
+
+{% if success %}
+<div class="alert alert-success">{{ message }}</div>
+{% endif %}
+
+<div class="card">
+    <h2 style="margin-top: 0; font-size: 18px; font-weight: 600;">Upload Merit List CSV</h2>
+    <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">
+        Upload a CSV file containing students from the external testing service. 
+        <br><br>
+        <strong>Required columns:</strong> <code>name</code>, <code>father_name</code>, <code>cnic</code>, <code>district</code>, <code>marks</code>
+    </p>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="csv_file">CSV File</label>
+            <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
+        </div>
+        <button type="submit" class="btn">Import Merit List</button>
+    </form>
+</div>
+
+{% endblock %}

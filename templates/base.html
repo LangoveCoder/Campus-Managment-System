@@ -163,6 +163,7 @@
     </div>
 
     <nav class="sidebar-nav">
+      {% if not is_superadmin or has_campus_admin %}
       {# RULE: always use spaces around == in Django template tags #}
       <a href="/dashboard/" {% if active_section == 'dashboard' %} class="active" {% endif %}>
         Dashboard
@@ -187,6 +188,13 @@
       <a href="/timetable/" {% if active_section == 'timetable' %} class="active" {% endif %}>
         Timetable
       </a>
+      {% endif %}
+      {% if is_superadmin %}
+      {# RULE: always use spaces around == in Django template tags #}
+      <a href="/superadmin/campuses/" {% if active_section == 'superadmin' %} class="active" {% endif %} style="color:#f59e0b;">
+        ⬡ Super Admin
+      </a>
+      {% endif %}
     </nav>
 
     <style>

@@ -6,13 +6,15 @@ from kernel.facades import AuthorizationFacade
 from .services.academic_query_service import AcademicQueryService
 from .services.enrollment_service import EnrollmentService
 from .services.assessment_service import AssessmentService
-from .models import AcademicProgram, ClassGroup, AssessmentInstance
+from .services.academic_service import AcademicService
+from .models import AcademicProgram, AcademicCycle, ClassGroup, AssessmentInstance
 
 def get_campus_context(request: HttpRequest):
     campus_id = request.session.get('current_campus_id')
-    if not campus_id:
+    try:
+        return int(campus_id)
+    except (TypeError, ValueError):
         return None
-    return int(campus_id)
 
 def _get_person_id(request: HttpRequest):
     person = getattr(request.user, 'person', None)
@@ -209,4 +211,115 @@ def class_results(request: HttpRequest, class_group_id: int) -> HttpResponse:
         'instances': instances,
         'summary': summary,
         'active_section': 'academics'
+    })
+
+@login_required
+def create_program(request: HttpRequest) -> HttpResponse:
+    campus_id = get_campus_context(request)
+    if not campus_id:
+        return redirect('select_campus')
+
+    from .models import AssessmentScheme
+    assessment_schemes = list(AssessmentScheme.objects.all_campuses().values('id', 'name'))
+    program_type_choices = AcademicProgram._meta.get_field('program_type').choices
+
+    error = None
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        code = request.POST.get('code', '').strip()
+        description = request.POST.get('description', '')
+        program_type = request.POST.get('program_type', '')
+        assessment_scheme_id = request.POST.get('assessment_scheme_id', '')
+        duration_years = request.POST.get('duration_years', '') or None
+        try:
+            AcademicService.create_program(
+                person_id=_get_person_id(request),
+                campus_id=campus_id,
+                name=name,
+                code=code,
+                program_type=program_type,
+                assessment_scheme_id=int(assessment_scheme_id),
+                description=description,
+                duration_years=int(duration_years) if duration_years else None,
+            )
+            return redirect('program_list')
+        except Exception as e:
+            error = str(e)
+
+    return render(request, 'academics/create_program.html', {
+        'active_section': 'academics',
+        'error': error,
+        'assessment_schemes': assessment_schemes,
+        'program_type_choices': program_type_choices,
+    })
+
+
+@login_required
+def create_cycle(request: HttpRequest, program_id: int) -> HttpResponse:
+    campus_id = get_campus_context(request)
+    if not campus_id:
+        return redirect('select_campus')
+
+    program = get_object_or_404(AcademicProgram, id=program_id, campus_id=campus_id)
+    error = None
+    
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        try:
+            from .models import AcademicCycle
+            last = AcademicCycle.objects.filter(academic_program_id=program_id).order_by('-sequence').first()
+            sequence = (last.sequence + 1) if last else 1
+            
+            AcademicService.create_cycle(
+                person_id=_get_person_id(request),
+                campus_id=campus_id,
+                program_id=program_id,
+                name=name,
+                sequence=sequence,
+                start_date=start_date,
+                end_date=end_date
+            )
+            return redirect('program_detail', program_id=program_id)
+        except Exception as e:
+            error = str(e)
+
+    return render(request, 'academics/create_cycle.html', {
+        'program': program,
+        'active_section': 'academics',
+        'error': error
+    })
+
+
+@login_required
+def create_class_group(request: HttpRequest, program_id: int, cycle_id: int) -> HttpResponse:
+    campus_id = get_campus_context(request)
+    if not campus_id:
+        return redirect('select_campus')
+
+    program = get_object_or_404(AcademicProgram, id=program_id, campus_id=campus_id)
+    cycle = get_object_or_404(AcademicCycle, id=cycle_id, academic_program_id=program_id)
+    error = None
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        capacity = request.POST.get('capacity', 30)
+        try:
+            AcademicService.create_class_group(
+                person_id=_get_person_id(request),
+                campus_id=campus_id,
+                cycle_id=cycle_id,
+                name=name,
+                capacity=capacity
+            )
+            return redirect('program_detail', program_id=program_id)
+        except Exception as e:
+            error = str(e)
+
+    return render(request, 'academics/create_class_group.html', {
+        'program': program,
+        'cycle': cycle,
+        'active_section': 'academics',
+        'error': error
     })

@@ -20,6 +20,7 @@ urlpatterns = [
     path("workforce/", include("modules.workforce.urls_html")),
     path("timetable/", include("modules.timetable.urls_html")),
     path("media-assets/", include("modules.media.urls_html")),
+    path("superadmin/", include("modules.superadmin.urls_html")),
     path("", include("kernel.urls")),                        # Kernel UI + API
     path("api/dashboard/", include("modules.dashboard.urls")),
     path("api/academics/", include("modules.academics.urls")),

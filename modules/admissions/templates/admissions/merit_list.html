@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Merit List Ranking{% endblock %}
+{% block page_title %}Merit List Ranking{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 16px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+    th { background-color: #f8fafc; font-weight: 600; color: #475569; }
+    .btn { padding: 6px 12px; border: none; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; color: white; margin-right: 4px; }
+    .btn-accept { background: #16a34a; }
+    .btn-accept:hover { background: #15803d; }
+    .btn-reject { background: #ef4444; }
+    .btn-reject:hover { background: #b91c1c; }
+    .btn-waitlist { background: #eab308; }
+    .btn-waitlist:hover { background: #ca8a04; }
+    .breadcrumb { display: flex; gap: 8px; margin-bottom: 24px; font-size: 14px; color: #64748b; padding: 24px 24px 0 24px; }
+    .breadcrumb a { color: #3b82f6; text-decoration: none; }
+    .breadcrumb .separator::after { content: "→"; margin-left: 8px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="/dashboard/">Dashboard</a>
+    <span class="separator"></span>
+    <a href="{% url 'applications_list' %}">Admissions</a>
+    <span class="separator"></span>
+    <span>Merit List Ranking</span>
+</nav>
+
+<div class="card" style="margin: 24px;">
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Father Name</th>
+                <th>CNIC</th>
+                <th>Test Marks</th>
+                <th>Int. Marks</th>
+                <th>Merit Score</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td><strong>#{{ forloop.counter }}</strong></td>
+                <td>{{ app.applicant.full_name }}</td>
+                <td>{{ app.father_name|default:"-" }}</td>
+                <td>{{ app.cnic|default:"-" }}</td>
+                <td>{{ app.marks|default:"-" }}</td>
+                <td>{{ app.interview_marks|default:"-" }}</td>
+                <td style="font-weight: bold; color: #0f172a;">{{ app.merit_score|default:"-" }}</td>
+                <td>
+                    <form method="POST" style="margin: 0; display: inline-flex;">
+                        {% csrf_token %}
+                        <input type="hidden" name="application_id" value="{{ app.id }}">
+                        <button type="submit" name="action" value="accept" class="btn btn-accept">Accept</button>
+                        <button type="submit" name="action" value="waitlist" class="btn btn-waitlist">Waitlist</button>
+                        <button type="submit" name="action" value="reject" class="btn btn-reject">Reject</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="text-align: center; color: #64748b; padding: 32px;">No applications have passed the interview stage yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

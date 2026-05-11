@@ -161,3 +161,34 @@ class JWTAuthenticationMiddleware:
         except Exception:
             pass  # catch-all — middleware must never crash a request
 
+class SuperAdminRedirectMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.user.is_authenticated:
+            person = getattr(request.user, 'person', None)
+            if person:
+                from kernel.models import UserRoleBinding
+                # Get all active role names for this person
+                active_roles = list(UserRoleBinding.objects.filter(
+                    person=person,
+                    is_active=True
+                ).values_list('role__name', flat=True))
+                
+                is_superadmin = 'SUPER_ADMIN' in active_roles
+                has_other_roles = any(r != 'SUPER_ADMIN' for r in active_roles)
+                
+                path = request.path
+                # If superadmin tries to access module URLs, redirect to superadmin panel
+                # Bypass: allow access if they ALSO hold a campus-scoped role
+                module_prefixes = [
+                    '/dashboard/', '/academics/', '/admissions/',
+                    '/attendance/', '/workforce/', '/timetable/',
+                    '/media-assets/',
+                ]
+                if is_superadmin and not has_other_roles and any(path.startswith(p) for p in module_prefixes):
+                    from django.shortcuts import redirect
+                    return redirect('/superadmin/campuses/')
+
+        return self.get_response(request)

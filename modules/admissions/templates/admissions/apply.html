@@ -3,43 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apply for Admission</title>
+    <title>Admission Application</title>
     <style>
         body { font-family: 'Inter', -apple-system, sans-serif; background: #f8fafc; display: flex; justify-content: center; padding: 48px 24px; color: #1e293b; margin: 0; }
-        .card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 32px; width: 100%; max-width: 400px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        h1 { font-size: 24px; font-weight: 600; margin-top: 0; margin-bottom: 24px; color: #0f172a; text-align: center; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #475569; }
-        input[type="text"] { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; box-sizing: border-box; }
-        input[type="text"]:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-        .btn { width: 100%; background: #3b82f6; color: white; padding: 12px; border: none; border-radius: 6px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+        .card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 36px; width: 100%; max-width: 600px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; color: #0f172a; }
+        .subtitle { font-size: 13px; color: #64748b; margin-bottom: 28px; }
+        .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin: 24px 0 14px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #374151; }
+        input, select, textarea { width: 100%; padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; box-sizing: border-box; color: #1e293b; background: #fff; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        textarea { resize: vertical; min-height: 72px; }
+        .btn { width: 100%; background: #3b82f6; color: white; padding: 12px; border: none; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
         .btn:hover { background: #2563eb; }
-        .alert { padding: 16px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; text-align: center; }
-        .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .alert { padding: 16px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; }
+        .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; text-align: center; }
         .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .ref { font-size: 32px; font-weight: 800; color: #3b82f6; margin: 12px 0; display: block; }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>Admission Application</h1>
-        
+        <p class="subtitle">Fill in the form below to apply for admission. All fields marked * are required.</p>
+
         {% if error %}
         <div class="alert alert-error">{{ error }}</div>
         {% endif %}
-        
+
         {% if success %}
         <div class="alert alert-success">
-            <strong>Success!</strong><br><br>
-            Your application has been submitted.<br>
-            Reference: <strong>#{{ application_id }}</strong>
+            <strong>Application Submitted!</strong>
+            <span class="ref">#{{ application_id }}</span>
+            Please save your reference number for future enquiries.
         </div>
         {% else %}
         <form method="POST">
             {% csrf_token %}
-            <div class="form-group">
-                <label for="full_name">Full Name</label>
-                <input type="text" id="full_name" name="full_name" required placeholder="John Doe">
+
+            <div class="section-title">Personal Information</div>
+            <div class="row">
+                <div class="form-group">
+                    <label for="full_name">Full Name *</label>
+                    <input type="text" id="full_name" name="full_name" required placeholder="e.g. Ali Hassan">
+                </div>
+                <div class="form-group">
+                    <label for="father_name">Father's Name</label>
+                    <input type="text" id="father_name" name="father_name" placeholder="e.g. Muhammad Hassan">
+                </div>
             </div>
+            <div class="row">
+                <div class="form-group">
+                    <label for="date_of_birth">Date of Birth</label>
+                    <input type="date" id="date_of_birth" name="date_of_birth">
+                </div>
+                <div class="form-group">
+                    <label for="cnic">CNIC / B-Form No.</label>
+                    <input type="text" id="cnic" name="cnic" placeholder="e.g. 35202-1234567-1">
+                </div>
+            </div>
+
+            <div class="section-title">Contact Details</div>
+            <div class="row">
+                <div class="form-group">
+                    <label for="contact_number">Contact Number</label>
+                    <input type="text" id="contact_number" name="contact_number" placeholder="e.g. 0300-1234567">
+                </div>
+                <div class="form-group">
+                    <label for="district">District</label>
+                    <input type="text" id="district" name="district" placeholder="e.g. Lahore">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="address">Home Address</label>
+                <textarea id="address" name="address" placeholder="Street, City, Province"></textarea>
+            </div>
+
+            <div class="section-title">Academic Background</div>
+            <div class="form-group" style="max-width: 200px;">
+                <label for="marks">Previous Marks (out of 1100)</label>
+                <input type="number" id="marks" name="marks" placeholder="e.g. 950" min="0" max="1100" step="0.01">
+            </div>
+
             <button type="submit" class="btn">Submit Application</button>
         </form>
         {% endif %}

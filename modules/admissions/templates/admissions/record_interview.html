@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Record Interview{% endblock %}
+{% block page_title %}Record Interview{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
+    .form-group { margin-bottom: 20px; }
+    label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #475569; }
+    input, textarea, select { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+    .btn { background: #3b82f6; color: white; padding: 10px 16px; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .btn:hover { background: #2563eb; }
+    .breadcrumb { display: flex; gap: 8px; margin-bottom: 24px; font-size: 14px; color: #64748b; }
+    .breadcrumb a { color: #3b82f6; text-decoration: none; }
+    .breadcrumb .separator::after { content: "→"; margin-left: 8px; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="breadcrumb">
+    <a href="/dashboard/">Dashboard</a>
+    <span class="separator"></span>
+    <a href="{% url 'applications_list' %}">Admissions</a>
+    <span class="separator"></span>
+    <a href="{% url 'application_detail' application.id %}">App #{{ application.id }}</a>
+    <span class="separator"></span>
+    <span>Record Interview</span>
+</nav>
+
+{% if error %}
+<div style="background:#fee2e2; color:#991b1b; padding:14px 18px; border-radius:6px; margin-bottom:20px; border:1px solid #fecaca;">{{ error }}</div>
+{% endif %}
+
+<div class="card">
+    <h2 style="margin-top: 0; font-size: 18px; font-weight: 600;">Record Interview Details</h2>
+    <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">
+        Applicant: <strong>{{ application.applicant.full_name }}</strong>
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        {% if is_scored %}
+        <div class="form-group" style="background: #f8fafc; padding: 16px; border: 1px dashed #cbd5e1; border-radius: 6px;">
+            <label for="interview_marks">Interview Marks (Scored Config Detected)</label>
+            <input type="number" step="0.01" id="interview_marks" name="interview_marks" required>
+        </div>
+        {% endif %}
+        
+        <div class="form-group">
+            <label for="recommendation">Overall Recommendation</label>
+            <select name="recommendation" id="recommendation">
+                <option value="Pass">Pass / Proceed</option>
+                <option value="Hold">Hold / Review Later</option>
+                <option value="Fail">Fail</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="remarks">Interviewer Remarks</label>
+            <textarea name="remarks" id="remarks" rows="4"></textarea>
+        </div>
+
+        <button type="submit" class="btn">Mark as Interviewed</button>
+    </form>
+</div>
+
+{% endblock %}

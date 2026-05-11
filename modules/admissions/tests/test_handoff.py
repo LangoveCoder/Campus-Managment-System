@@ -4,6 +4,7 @@ from unittest.mock import patch
 from kernel.models import Person, Campus, Role, UserRoleBinding, RolePermissionMap
 from modules.admissions.models import Applicant, AdmissionApplication
 from modules.admissions.services import AdmissionsService
+from modules.academics.models import AcademicProgram, AssessmentScheme
 from django.core.exceptions import ValidationError
 import datetime
 from django.apps import apps
@@ -26,6 +27,8 @@ class HandoffTests(TestCase):
         )
         
         self.applicant = Applicant.objects.create(full_name="Future Student", date_of_birth="2005-01-01", campus=self.campus)
+        self.scheme = AssessmentScheme.objects.create(name="Test Scheme", campus=self.campus)
+        self.program = AcademicProgram.objects.create(name="Test Program", program_type="BACHELORS", duration_years=4, assessment_scheme=self.scheme, campus=self.campus)
 
     def test_handoff_success(self):
         """
@@ -40,9 +43,18 @@ class HandoffTests(TestCase):
         # Case 2: Application is ACCEPTED
         app_2 = AdmissionApplication.objects.create(applicant=self.applicant, campus=self.campus, status="ACCEPTED")
         
-        # We mock the actual Academics call since we are testing the Admissions logic boundary
-        # In a real integration test, we would check if Enrollment record exists.
-        result = AdmissionsService.convert_to_enrollment(self.person.id, app_2.id)
+        # Mock external dependencies
+        with patch('kernel.models.Person.objects.create') as mock_person, \
+             patch('modules.campus_identity.services.CampusIdentityService.add_person_to_campus') as mock_identity, \
+             patch('modules.academics.models.StudentProfile.objects.create') as mock_profile:
+             
+            # Setup mocks
+            from unittest.mock import MagicMock
+            mock_identity.return_value = MagicMock(campus_identifier='TEST-123')
+            
+            result = AdmissionsService.convert_to_enrollment(self.person.id, app_2.id, program_id=self.program.id)
+            
+            self.assertEqual(result['status'], 'success')
+            self.assertIn('TEST-123', result['message'])
         
-        self.assertEqual(result['status'], 'success')
         print("\n✅ Handoff Test Passed: Only ACCEPTED applications can be enrolled.")

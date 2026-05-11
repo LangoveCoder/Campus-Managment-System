@@ -21,6 +21,7 @@
 - [x] Phase 10: Admissions Module (Constitutional Data Pipeline) (15/15 tasks) ✅ **COMPLETE**
 - [x] Phase 11: Attendance Module (Student Ledger) (15/15 tasks) ✅ **COMPLETE**
 - [x] Phase 12: Workforce Attendance Module (v1) (15/15 tasks) ✅ **COMPLETE**
+- [x] Phase 18: Academics Module UI (5/5 tasks) ✅ **COMPLETE**
 
 ---
 
@@ -542,6 +543,16 @@
 - [x] **17.5** Verify Dashboard dashboard reflects: 10 Students, 3 Groups, 2 Staff
 
 **Phase 17 Status:** [x] Complete (Data Powered)
+
+## PHASE 18: Academics UI Management
+
+- [x] **18.1** Update UI structure in `urls_html.py`, `views_html.py` for new form templates.
+- [x] **18.2** Build dedicated `academic_service.py` service layer with creation handlers.
+- [x] **18.3** Modify `models.py` schema (added `description` onto `AcademicProgram`).
+- [x] **18.4** Implement template wiring (`program_list.html` and `program_detail.html` navigation).
+- [x] **18.5** Resolve `AssessmentScheme` global contextual bounding (`all_campuses()` retrieval).
+
+**Phase 18 Status:** [x] Complete (Deployed & Verified)
 
 ---
 **Current Project Status:** ALL PHASES COMPLETE ✅

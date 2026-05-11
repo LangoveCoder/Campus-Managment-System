@@ -44,11 +44,13 @@ def workforce_dashboard(request):
     results = summary.get('results', [])
     present_today = sum(1 for r in results if r['total_in'] > 0)
     
-    # We would need to know total staff to calculate 'absent'. 
-    # For now, we will mock these high level metrics or query Person with role bindings
-    # Real implementation would query UserRoleBinding for staff count
-    # Since we can't query kernel freely without a service, we'll put placeholders or query Person naively
-    total_staff = Person.objects.count() # Mock for now
+    # Calculate total staff for this campus (excluding students)
+    from kernel.models import UserRoleBinding
+    total_staff = UserRoleBinding.objects.filter(
+        campus_id=campus_id,
+        is_active=True
+    ).exclude(role__name='STUDENT').values('person_id').distinct().count()
+    
     absent = max(0, total_staff - present_today)
     late = 0 # Need shift definitions to calculate late. Placeholder for now.
 
@@ -204,3 +206,123 @@ def workforce_devices(request):
         'active_section': 'workforce'
     }
     return render(request, 'workforce/devices.html', context)
+
+
+STAFF_ROLES = ['FACULTY', 'REGISTRAR', 'ACCOUNTANT', 'LIBRARIAN', 'SECURITY']
+
+@login_required
+def staff_list(request):
+    campus_id = get_campus_context(request)
+    if not campus_id:
+        return redirect('select_campus')
+
+    try:
+        from kernel.services import AuthorizationService
+        AuthorizationService.require_permission(_get_person_id(request), campus_id, 'workforce.view_attendance')
+    except Exception as e:
+        return render(request, 'workforce/staff.html', {'error': str(e), 'active_section': 'workforce'})
+
+    from kernel.models import UserRoleBinding
+    from modules.campus_identity.models import CampusPerson
+
+    bindings = UserRoleBinding.objects.filter(
+        campus_id=campus_id,
+        is_active=True,
+        role__name__in=STAFF_ROLES
+    ).select_related('person', 'role').order_by('role__name', 'person__full_name')
+
+    cp_map = {str(cp.person_id): cp.campus_identifier
+              for cp in CampusPerson.objects.filter(campus_id=campus_id)}
+
+    staff = []
+    for b in bindings:
+        staff.append({
+            'full_name': b.person.full_name,
+            'primary_phone': b.person.primary_phone,
+            'primary_email': b.person.primary_email or '—',
+            'role': b.role.get_name_display(),
+            'campus_id_str': cp_map.get(str(b.person.id), '—'),
+        })
+
+    from kernel.models import Role
+    roles = Role.objects.filter(name__in=STAFF_ROLES).order_by('name')
+
+    return render(request, 'workforce/staff.html', {
+        'staff': staff,
+        'roles': roles,
+        'active_section': 'workforce',
+    })
+
+
+@login_required
+def add_staff(request):
+    campus_id = get_campus_context(request)
+    if not campus_id:
+        return redirect('select_campus')
+
+    try:
+        from kernel.services import AuthorizationService
+        AuthorizationService.require_permission(_get_person_id(request), campus_id, 'workforce.manage_devices')
+    except Exception as e:
+        return redirect('staff_list')
+
+    if request.method != 'POST':
+        return redirect('staff_list')
+
+    import uuid
+    from django.db import transaction
+    from kernel.models import Person, Role, UserRoleBinding
+    from modules.campus_identity.services import CampusIdentityService
+
+    full_name   = request.POST.get('full_name', '').strip()
+    phone       = request.POST.get('primary_phone', '').strip() or f'TMP-{uuid.uuid4().hex[:8]}'
+    email       = request.POST.get('primary_email', '').strip() or None
+    role_name   = request.POST.get('role_name', 'FACULTY')
+
+    error = None
+    try:
+        with transaction.atomic():
+            person = Person.objects.create(
+                full_name=full_name,
+                primary_phone=phone,
+                primary_email=email,
+            )
+            CampusIdentityService.add_person_to_campus(str(person.id), str(campus_id))
+            role = Role.objects.get(name=role_name)
+            UserRoleBinding.objects.create(
+                person=person,
+                role=role,
+                campus_id=campus_id,
+            )
+    except Exception as e:
+        error = str(e)
+
+    from kernel.models import Role as RoleModel
+    roles = RoleModel.objects.filter(name__in=STAFF_ROLES).order_by('name')
+    from kernel.models import UserRoleBinding as URB
+    from modules.campus_identity.models import CampusPerson
+
+    bindings = URB.objects.filter(
+        campus_id=campus_id, is_active=True, role__name__in=STAFF_ROLES
+    ).select_related('person', 'role').order_by('role__name', 'person__full_name')
+
+    cp_map = {str(cp.person_id): cp.campus_identifier
+              for cp in CampusPerson.objects.filter(campus_id=campus_id)}
+
+    staff = []
+    for b in bindings:
+        staff.append({
+            'full_name': b.person.full_name,
+            'primary_phone': b.person.primary_phone,
+            'primary_email': b.person.primary_email or '—',
+            'role': b.role.get_name_display(),
+            'campus_id_str': cp_map.get(str(b.person.id), '—'),
+        })
+
+    return render(request, 'workforce/staff.html', {
+        'staff': staff,
+        'roles': roles,
+        'error': error,
+        'success': None if error else f'{full_name} added successfully.',
+        'active_section': 'workforce',
+    })

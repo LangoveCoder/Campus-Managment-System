@@ -26,6 +26,7 @@ class AcademicProgram(BaseCampusModel):
     name = models.CharField(max_length=200)
     code = models.CharField(max_length=50)
     program_type = models.CharField(max_length=20, choices=PROGRAM_TYPES)
+    description = models.TextField(blank=True, default='')
     
     # Informational only, not enforced
     duration_years = models.IntegerField(null=True, blank=True)

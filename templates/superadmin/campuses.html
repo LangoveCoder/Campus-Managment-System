@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Campuses — Super Admin{% endblock %}
+{% block page_title %}Campuses{% endblock %}
+
+{% block extra_css %}
+<style>
+  .sa-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .btn-primary {
+    padding: 9px 18px;
+    background: #3b82f6;
+    color: #fff;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+  }
+
+  .btn-primary:hover { background: #2563eb; }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .data-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    padding: 13px 20px;
+    text-transform: uppercase;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  .data-table td {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 14px;
+    color: #1e293b;
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #f8fafc; }
+
+  .badge-id {
+    font-family: monospace;
+    font-size: 12px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .btn-danger {
+    background: none;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+    padding: 5px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn-danger:hover { background: #fee2e2; }
+
+  .alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if error %}
+<div class="alert-error">{{ error }}</div>
+{% endif %}
+<div class="sa-header">
+  <h2 style="font-size:18px;font-weight:600;color:#1e293b;">All Campuses</h2>
+  <a href="{% url 'superadmin_create_campus' %}" class="btn-primary">+ New Campus</a>
+</div>
+
+{% if campus_rows %}
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Campus Name</th>
+      <th>ID Prefix</th>
+      <th>Padding</th>
+      <th>Admins</th>
+      <th>Created</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in campus_rows %}
+    <tr>
+      <td style="font-weight:500;">{{ row.campus.name }}</td>
+      <td><span class="badge-id">{{ row.prefix }}</span></td>
+      <td>{{ row.padding }}</td>
+      <td>{{ row.admin_count }}</td>
+      <td style="color:#64748b;">{{ row.campus.created_at|date:"j M Y" }}</td>
+      <td>
+        {% if row.admin_count == 0 %}
+        <form method="POST" action="{% url 'superadmin_delete_campus' row.campus.id %}" onsubmit="return confirm('Delete {{ row.campus.name }}? This cannot be undone.');">
+          {% csrf_token %}
+          <button type="submit" class="btn-danger">Delete</button>
+        </form>
+        {% else %}
+        <span style="font-size:12px;color:#94a3b8;">Has admins</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="empty-state">
+  <p>No campuses found. <a href="{% url 'superadmin_create_campus' %}" style="color:#3b82f6;">Create the first one →</a></p>
+</div>
+{% endif %}
+{% endblock %}

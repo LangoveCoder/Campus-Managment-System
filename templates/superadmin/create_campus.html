@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Create Campus — Super Admin{% endblock %}
+{% block page_title %}Create Campus{% endblock %}
+
+{% block extra_css %}
+<style>
+  .form-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 32px;
+    max-width: 640px;
+  }
+
+  .form-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+    margin: 28px 0 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .form-section-title:first-child { margin-top: 0; }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #1e293b;
+    background: #f8fafc;
+    transition: border-color .15s;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: #fff;
+  }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .hint {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 4px;
+  }
+
+  .btn-submit {
+    padding: 10px 24px;
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  .btn-submit:hover { background: #2563eb; }
+
+  .btn-cancel {
+    padding: 10px 18px;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 14px;
+    margin-left: 10px;
+  }
+
+  .alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+  {% if error %}
+  <div class="alert-error">{{ error }}</div>
+  {% endif %}
+
+  <form method="POST" action="{% url 'superadmin_create_campus' %}">
+    {% csrf_token %}
+
+    <div class="form-section-title">Campus Details</div>
+
+    <div class="form-group">
+      <label for="name">Campus Name *</label>
+      <input type="text" id="name" name="name" placeholder="e.g. Gulshan Campus" required>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="city">City / Address</label>
+        <input type="text" id="city" name="city" placeholder="e.g. Karachi">
+      </div>
+      <div class="form-group">
+        <label for="contact_email">Contact Email</label>
+        <input type="email" id="contact_email" name="contact_email" placeholder="info@campus.edu">
+      </div>
+    </div>
+
+    <div class="form-section-title">Campus ID Configuration</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="prefix">ID Prefix</label>
+        <input type="text" id="prefix" name="prefix" placeholder="e.g. GCQ" maxlength="10">
+        <div class="hint">Leave blank for numeric-only IDs</div>
+      </div>
+      <div class="form-group">
+        <label for="padding">Number Padding</label>
+        <input type="number" id="padding" name="padding" value="6" min="3" max="10">
+        <div class="hint">e.g. 6 → GCQ-000001</div>
+      </div>
+    </div>
+
+    <div class="form-section-title">First Admin Account</div>
+
+    <div class="form-group">
+      <label for="admin_full_name">Full Name *</label>
+      <input type="text" id="admin_full_name" name="admin_full_name" placeholder="e.g. Ahmad Raza" required>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="admin_phone">Phone (used as username) *</label>
+        <input type="text" id="admin_phone" name="admin_phone" placeholder="+923001234567" required>
+      </div>
+      <div class="form-group">
+        <label for="admin_password">Password *</label>
+        <input type="password" id="admin_password" name="admin_password" required>
+      </div>
+    </div>
+
+    <div>
+      <button type="submit" class="btn-submit">Create Campus</button>
+      <a href="{% url 'superadmin_campuses' %}" class="btn-cancel">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -82,11 +82,14 @@
 {% endblock %}
 
 {% block content %}
-<nav class="breadcrumb">
-    <a href="/dashboard/">Dashboard</a>
-    <span class="separator"></span>
-    <span>Academics</span>
-</nav>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <nav class="breadcrumb" style="margin-bottom: 0;">
+        <a href="/dashboard/">Dashboard</a>
+        <span class="separator"></span>
+        <span>Academics</span>
+    </nav>
+    <a href="{% url 'create_program' %}" class="btn btn-primary" style="padding: 8px 16px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; font-weight: 500;">+ New Program</a>
+</div>
 
 <div class="academics-container">
     {% if programs %}
