@@ -1,7 +1,18 @@
 # Campus Management Platform - Walkthrough
 
-**Date:** 2026-02-19
+**Date:** 2026-06-17
 **Status:** Project Complete ✅
+
+---
+
+## Phase 19: Profiles Module (Person Profile Management)
+**Goal:** Provide editable person profiles with personal, family, emergency, and academic/professional details.
+**Outcome:** Created `PersonProfile` model (per-campus profile), service layer, edit UI, and test suite.
+**Key Features:**
+- **Model:** UUID PK, FK Person + Campus, unique_together constraint. Fields: blood group, CNIC, DOB, address, family info, emergency contacts, academic history.
+- **Services:** `get_or_create_profile()`, `update_profile()` (whitelist-based), `get_profile()`.
+- **UI:** `/profiles/<uuid>/edit/` form with Bootstrap layout. Wired into Workforce staff list and Academics class detail.
+- **Tests:** 7/7 passing (create, idempotent, update, nullify, uniqueness, missing, `__str__`).
 
 ---
 

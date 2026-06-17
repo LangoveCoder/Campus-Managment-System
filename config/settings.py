@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "modules.admissions",
     "modules.attendance",
     "modules.workforce",
+    "modules.profiles",
     "modules.dashboard",
     "modules.timetable",
     "modules.media",

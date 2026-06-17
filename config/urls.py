@@ -18,6 +18,7 @@ urlpatterns = [
     path("attendance/", include("modules.attendance.urls_html")),
     path("admissions/", include("modules.admissions.urls_html")),
     path("workforce/", include("modules.workforce.urls_html")),
+    path("profiles/", include("modules.profiles.urls_html", namespace="profiles")),
     path("timetable/", include("modules.timetable.urls_html")),
     path("media-assets/", include("modules.media.urls_html")),
     path("superadmin/", include("modules.superadmin.urls_html")),

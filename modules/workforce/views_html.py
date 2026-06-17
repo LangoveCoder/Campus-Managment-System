@@ -237,6 +237,7 @@ def staff_list(request):
     staff = []
     for b in bindings:
         staff.append({
+            'person_id': str(b.person.id),
             'full_name': b.person.full_name,
             'primary_phone': b.person.primary_phone,
             'primary_email': b.person.primary_email or '—',
@@ -312,6 +313,7 @@ def add_staff(request):
     staff = []
     for b in bindings:
         staff.append({
+            'person_id': str(b.person.id),
             'full_name': b.person.full_name,
             'primary_phone': b.person.primary_phone,
             'primary_email': b.person.primary_email or '—',

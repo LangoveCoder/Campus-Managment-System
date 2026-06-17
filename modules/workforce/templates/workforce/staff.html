@@ -100,7 +100,7 @@ input, select { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px
                     {% endif %}
                 </td>
                 <td>{{ s.primary_phone }}</td>
-                <td>{{ s.primary_email }}</td>
+                <td><div style="display: flex; gap: 12px; align-items: center;"><span>{{ s.primary_email }}</span><a href="{% url 'profiles:edit_profile' s.person_id %}" style="font-size: 13px; color: #3b82f6; text-decoration: underline;">Edit Profile</a></div></td>
             </tr>
             {% endfor %}
         </tbody>
