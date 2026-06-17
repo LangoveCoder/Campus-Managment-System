@@ -1,0 +1,44 @@
+# =============================================================================
+# .claudeignore — keep Claude focused on source, config, and docs.
+# =============================================================================
+
+# ---- Python virtual environment (massive, binary) ----
+venv312/
+venv/
+env/
+.venv/
+
+# ---- Version control internals ----
+.git/
+
+# ---- Python bytecode & caches ----
+**/__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# ---- Environment secrets ----
+.env
+
+# ---- Logs & databases ----
+*.log
+*.sqlite3
+*.sqlite3-journal
+db.sqlite3
+
+# ---- IDE & editor clutter ----
+.vscode/
+.idea/
+Thumbs.db
+
+# ---- OS junk ----
+.DS_Store
+
+# ---- Compiled assets (none yet, but future-proof) ----
+*.min.js
+*.min.css
+*.map
+
+# ---- Node (none yet, but future-proof) ----
+node_modules/
+package-lock.json
